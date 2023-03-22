@@ -1,0 +1,12 @@
+<div class="p-5">
+  <%= line_chart plot, library: {
+    backgroundColor: "#000000"
+  }, options: {
+    explorer: {
+      actions: {
+        axis: 'horizontal',
+        actions: %w[dragToZoom rightClickToReset]
+      }
+    }
+  } %>
+</div>
