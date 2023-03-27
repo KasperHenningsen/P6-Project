@@ -88,6 +88,7 @@ GEM
     debug (1.7.1)
       irb (>= 1.5.0)
       reline (>= 0.3.1)
+    dygraphs-rails (1.0.1)
     erubi (1.12.0)
     globalid (1.1.0)
       activesupport (>= 5.0)
@@ -216,6 +217,7 @@ DEPENDENCIES
   capybara
   chartkick (~> 5.0)
   debug
+  dygraphs-rails (~> 1.0)
   importmap-rails
   jbuilder
   puma (~> 5.0)

@@ -1,0 +1,25 @@
+<body>
+<div style="margin: auto">
+
+  <h1 style="text-align: center">Ass graph</h1>
+  <div id="graph_div"></div>
+
+
+
+  </div>
+
+</div>
+
+</body>
+
+
+
+<script>
+  let graph_data = <%= @fake_data %>;
+
+  new Dygraph(document.getElementById('graph_div'), graph_data, {
+        labels: ['Date', 'Temp Min', 'Temp Max'],
+        ylabel: 'Temperature',
+        legend: 'always'
+    });
+</script>

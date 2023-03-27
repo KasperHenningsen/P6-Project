@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Temperatures</h1>
+
+<div id="temperatures">
+  <% @temperatures.each do |temperature| %>
+    <%= render temperature %>
+    <p>
+      <%= link_to "Show this temperature", temperature %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New temperature", new_temperature_path %>

@@ -72,3 +72,5 @@ group :test do
 end
 
 gem "chartkick", "~> 5.0"
+
+gem "dygraphs-rails", "~> 1.0"

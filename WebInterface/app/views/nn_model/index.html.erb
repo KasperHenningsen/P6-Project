@@ -1,2 +1,17 @@
-<h1>NnModel#index</h1>
-<p>Find me in app/views/nn_model/index.html.erb</p>
+<div>
+  <div style="margin-right: 15%; margin-left: 15%">
+    <h1 style="text-align: center">Ass graph</h1>
+    <div style="margin: auto; text-align: center" id="graph_div"></div>
+  </div>
+</div>
+
+<script>
+    let graph_data = <%= @db_data %>;
+
+    new Dygraph(document.getElementById("graph_div"), graph_data, {
+        labels: ['Date', 'Min Temp', 'Max Temp'],
+        ylabel: 'Temperature (°C)',
+        xlabel: 'Date',
+        drawPoints: true
+    });
+</script>
