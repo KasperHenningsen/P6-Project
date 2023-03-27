@@ -1,6 +1,8 @@
 #MISC
 data/*
 
+**/data/*
+
 # User-specific stuff
 .idea/
 
