@@ -1,17 +1,37 @@
 <div>
   <div style="margin-right: 15%; margin-left: 15%">
     <h1 style="text-align: center">Ass graph</h1>
-    <div style="margin: auto; text-align: center" id="graph_div"></div>
+    <div class="w-auto" style="margin: auto; text-align: center" id="graph_div"></div>
   </div>
 </div>
 
 <script>
-    let graph_data = <%= @db_data %>;
+    let graph_data = <%= @data %>;
 
-    new Dygraph(document.getElementById("graph_div"), graph_data, {
-        labels: ['Date', 'Min Temp', 'Max Temp'],
-        ylabel: 'Temperature (°C)',
-        xlabel: 'Date',
-        drawPoints: true
+    let time_formatter = new Intl.DateTimeFormat('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
     });
+
+    let options = {
+        labels: ['Date', 'Min Temp', 'Max Temp'],
+        labelsSeparateLines: true,
+        ylabel: 'Temperature (°C)',
+        drawPoints: true,
+        axes: {
+            x: {
+                axisLabelWidth : 75,
+                axisLabelFormatter: function (date) {
+                    return time_formatter.format(date)
+                }
+            }
+        }
+    };
+
+    new Dygraph(document.getElementById("graph_div"), graph_data, options);
 </script>
+

@@ -2,7 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\WebInterface",
-    "\\WebInterface\\app"
+    "\\WebInterface\\app",
+    "\\WebInterface\\app\\controllers",
+    "\\WebInterface\\app\\views",
+    "\\WebInterface\\app\\views\\nn_model"
   ],
+  "SelectedNode": "\\WebInterface\\app\\views\\nn_model\\index.html.erb",
   "PreviewInSolutionExplorer": false
 }
