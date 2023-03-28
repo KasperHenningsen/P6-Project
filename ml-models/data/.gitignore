@@ -1,0 +1,4 @@
+# Ignore everything in this directory to keep the data out of git:
+*
+# The directory is only here for clarity
+# But empty folders are not added to git, so we just have this one file in it.
