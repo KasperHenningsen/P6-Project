@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from datasets import RegressionDataset
 

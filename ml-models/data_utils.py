@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklego.preprocessing import RepeatingBasisFunction
+from tqdm import tqdm
 
 
 def get_processed_data(path):
@@ -38,9 +39,9 @@ def get_processed_data(path):
     return df
 
 
-def prepare_X_and_y(input, n_steps_in=12, n_steps_out=12, target_column='temp'):
+def prepare_X_and_y(input, n_steps_in=12, n_steps_out=12, target_column='temp', step_size=1):
     X, y = [], []
-    for i in range(0, len(input)-(n_steps_in*2), n_steps_in):
+    for i in tqdm(range(0, len(input)-n_steps_in-n_steps_out, step_size), desc='Preparing X and y'):
         X_end_idx = i + n_steps_in
         y_end_idx = X_end_idx + n_steps_out
         if y_end_idx > len(input):
