@@ -38,23 +38,24 @@ def get_processed_data(path):
     return df
 
 
-def prepare_X_and_y(sequences, n_steps_in, n_steps_out, step_size=1):
+def prepare_X_and_y(input, n_steps_in=12, n_steps_out=12, target_column='temp'):
     X, y = [], []
-    for i in range(0, len(sequences), step_size):
+    for i in range(0, len(input)-(n_steps_in*2), n_steps_in):
         X_end_idx = i + n_steps_in
         y_end_idx = X_end_idx + n_steps_out
-
-        if y_end_idx > len(sequences):
+        if y_end_idx > len(input):
             break
-
-        X_seq = sequences[i:X_end_idx]
-        y_seq = sequences[X_end_idx:y_end_idx]
+        X_seq = input[i:X_end_idx]
+        y_seq = input[target_column][X_end_idx:y_end_idx]
         X.append(X_seq)
         y.append(y_seq)
     X, y = np.array(X), np.array(y)
+    return X, y
+
+
+def flatten_X_for_MLP(X):
     n_input = X.shape[1] * X.shape[2]
     X = X.reshape((X.shape[0], n_input))
-    n_output = y.shape[1] * y.shape[2]
-    y = y.reshape((y.shape[0], n_output))
-    return X, y
+    return X, n_input
+
 
