@@ -40,6 +40,7 @@ data/*
 
 # User-specific stuff
 .idea/
+.vs/
 
 # Gradle and Maven with auto-import
 # auto-import.
@@ -49,7 +50,7 @@ data/*
 # .idea/modules.xml
 # .idea/*.iml
 # .idea/modules
-# *.iml
+*.iml
 # *.ipr
 
 # CMake
