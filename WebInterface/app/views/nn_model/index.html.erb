@@ -1,37 +1,14 @@
-<div>
-  <div style="margin-right: 15%; margin-left: 15%">
-    <h1 style="text-align: center">Ass graph</h1>
-    <div class="w-auto" style="margin: auto; text-align: center" id="graph_div"></div>
+<div class="container-fluid">
+    <div class="row flex-nowrap">
+        <div class="col-sm-2">
+            <%= render 'nn_model/side_bar' %>
+        </div>
+        <div class="col">
+            <%= render 'nn_model/temperature_graph' %>
+        </div>
+    </div>
+    <div class="progress" style="height: 10px">
+        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+    </div>
   </div>
 </div>
-
-<script>
-    let graph_data = <%= @data %>;
-
-    let time_formatter = new Intl.DateTimeFormat('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
-
-    let options = {
-        labels: ['Date', 'Min Temp', 'Max Temp'],
-        labelsSeparateLines: true,
-        ylabel: 'Temperature (°C)',
-        drawPoints: true,
-        axes: {
-            x: {
-                axisLabelWidth : 75,
-                axisLabelFormatter: function (date) {
-                    return time_formatter.format(date)
-                }
-            }
-        }
-    };
-
-    new Dygraph(document.getElementById("graph_div"), graph_data, options);
-</script>
-

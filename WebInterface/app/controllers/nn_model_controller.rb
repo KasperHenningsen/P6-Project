@@ -2,10 +2,10 @@ require 'date'
 
 class NnModelController < ApplicationController
   def index
-    @data = Temperature.limit(1000).offset(0).map { |t| [
-      t.date * 1000,
+    @data = Temperature.limit(1000).map { |t| [
+      t.date,
       t.temp_min,
-      t.temp_max
-    ]}
+      t.temp_max]
+    }
   end
 end

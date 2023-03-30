@@ -1,0 +1,50 @@
+<div class="p-4">
+  <canvas id="chart_js_chart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.1/dist/chartjs-plugin-annotation.min.js"></script>
+
+<script>
+    const data = <%= @data %>;
+    const date_options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false
+    };
+
+    new Chart(
+      document.getElementById('chart_js_chart'),
+      {
+          type: 'line',
+          data: {
+              labels: data.map(column => new Date(column[0] * 1000).toLocaleDateString('da-DK', date_options)),
+              datasets: [
+                  {
+                      label: 'Temp Min',
+                      data: data.map(column => column[1])
+                  },
+                  {
+                      label: 'Temp Max',
+                      data: data.map(column => column[2])
+                  }
+              ]
+          },
+          options: {
+              plugins: {
+                  zoom: {
+                      zoom: {
+                          wheel: {
+                              enabled: true,
+                          },
+                          mode: 'x',
+                      }
+                  }
+              }
+          }
+      });
+</script>
