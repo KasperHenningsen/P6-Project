@@ -76,3 +76,5 @@ gem "chartkick", "~> 5.0"
 gem "dygraphs-rails", "~> 1.0"
 
 gem "solargraph", "~> 0.48.0"
+
+gem "async", "~> 2.5"

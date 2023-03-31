@@ -1,5 +1,6 @@
 <div class="p-4">
-  <canvas id="chart_js_chart"></canvas>
+    <p id="chart_loading_message">Loading chart data...</p>
+    <canvas id="chart_js_chart"></canvas>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -17,8 +18,13 @@
         hour12: false
     };
 
+    const chartContainer = document.getElementById('chart_js_chart');
+    const loadingMessage = document.getElementById('chart_loading_message');
+
+    loadingMessage.style.display = 'block';
+
     new Chart(
-      document.getElementById('chart_js_chart'),
+      chartContainer,
       {
           type: 'line',
           data: {
@@ -47,4 +53,6 @@
               }
           }
       });
+
+      loadingMessage.style.display = 'none';
 </script>
