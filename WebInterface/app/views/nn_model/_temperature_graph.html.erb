@@ -1,19 +1,25 @@
 <div class="p-4">
     <div>
-        <label>Number of datapoints: </label>
-        <select id="datapoints-selector">
-        <% ["1 Day", "7 Days", "1 Month", "6 Months", "1 Year", "2 Years", "5 Years", "10 Years", "All"].each do |option| %>
-            <% if option == "1 Month" %>
-            <option value="<%= option %>" selected><%= option %></option>
-            <% else %>
-            <option value="<%= option %>"><%= option %></option>
+        <div class="text-center">
+            <label>Number of datapoints: </label>
+            <select id="datapoints-selector">
+            <% ["1 Day", "7 Days", "1 Month", "6 Months", "1 Year", "2 Years", "5 Years", "10 Years", "All"].each do |option| %>
+                <% if option == "1 Month" %>
+                <option value="<%= option %>" selected><%= option %></option>
+                <% else %>
+                <option value="<%= option %>"><%= option %></option>
+                <% end %>
             <% end %>
-        <% end %>
-        </select>
+            </select>
+        </div>
     </div>
     <div>
-        <p id="chart_loading_message">Loading chart data...</p>
         <canvas id="chart_js_chart"></canvas>
+    </div>
+    <div class="text-center">
+        <div class="m-2 spinner-border" role="status" id="load_spinner">
+            <span class="visually-hidden">Loading...</span>
+        </div>
     </div>
 </div>
 
@@ -33,9 +39,9 @@
     };
 
     const chartContainer = document.getElementById('chart_js_chart');
-    const loadingMessage = document.getElementById('chart_loading_message');
+    const loadingSpinner = document.getElementById('load_spinner');
 
-    loadingMessage.style.display = 'block';
+    loadingSpinner.style.display = 'block';
 
     new Chart(
         chartContainer,
@@ -70,6 +76,7 @@
                         ticks: {
                             //Number of gridlines
                             maxTicksLimit: 40,
+                            //Frequenzy of labels
                             callback: function(val, index) {
                                 return index % 2 === 0 ? this.getLabelForValue(val) : '';
                             },
@@ -80,5 +87,5 @@
         }
       );
 
-    loadingMessage.style.display = 'none';
+    loadingSpinner.style.display = 'none';
 </script>

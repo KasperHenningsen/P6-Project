@@ -3,7 +3,7 @@ require 'async'
 
 class NnModelController < ApplicationController
   def index
-    limit = (24* 31)
+    limit = (24 * 31)
     #limit = get_limit(params[:datapoints])
 
     #puts "Selector: #{params[:datapoints]}"
