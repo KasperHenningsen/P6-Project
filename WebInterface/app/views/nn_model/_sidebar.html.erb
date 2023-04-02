@@ -1,0 +1,46 @@
+<div class="row flex-nowrap g-0">
+  <div class="col-sm-10 col-md-10" style="z-index: 1; height: auto">
+    <div class="vstack p-3 side-bar" id="sidebar-menu">
+      <%= render 'nn_model/sidebar_model' %>
+    </div>
+  </div>
+  <div class="col-sm-2 col-md-2" style="z-index: 0">
+    <div class="vstack container-sidebar-tabs" id="sidebar-tabs" name="sidebar-tabs">
+      <div class="sidebar-tab">
+        <%= radio_button_tag 'tab-btn', 'model', true, :class => 'btn-check sidebar-tab-input',
+                             :onclick => "render_partial('model');", :autocomplete => "off" %>
+        <%= label_tag 'tab-btn_model', 'Model', :class => 'btn sidebar-tab-label' %>
+      </div>
+
+      <div class="sidebar-tab">
+        <%= radio_button_tag 'tab-btn', 'training', false, :class => 'btn-check sidebar-tab-input',
+                             :onclick => "render_partial('training');", :autocomplete => "off" %>
+        <%= label_tag 'tab-btn_training', 'Training', :class => 'btn sidebar-tab-label' %>
+      </div>
+
+      <div class="sidebar-tab">
+        <%= radio_button_tag 'tab-btn', 'features', false, :class => 'btn-check sidebar-tab-input',
+                             :onclick => "render_partial('feature-matrix');", :autocomplete => "off" %>
+        <%= label_tag 'tab-btn_features', 'Features', :class => 'btn sidebar-tab-label' %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function render_partial(tab) {
+      const TARGET = $('#sidebar-menu');
+      TARGET.empty()
+      switch(tab) {
+          case 'model':
+              TARGET.html('<%=j render 'nn_model/sidebar_model' %>')
+              break
+          case 'training':
+              TARGET.html('<%=j render 'nn_model/sidebar_training' %>')
+              break
+          case 'feature-matrix':
+              TARGET.html('<%=j render 'nn_model/sidebar_features' %>')
+              break
+      }
+  }
+</script>

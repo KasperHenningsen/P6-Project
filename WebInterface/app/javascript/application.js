@@ -2,4 +2,7 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 //= require dygraph
+//= require jquery
+//= require jquery_ujs
+//= require bootstrap.min
 

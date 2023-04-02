@@ -1,0 +1,32 @@
+.side-bar {
+    background-color: #dedede;
+    width: fit-content;
+    height: 100%;
+}
+
+.container-sidebar-tabs {
+    padding: 5px 0 5px 0;
+    max-width: 100%;
+}
+
+.sidebar-tab {
+    background-color: #dedede;
+    margin: 2px 0 2px -50px !important;
+    text-align: center;
+    transition: transform ease 100ms;
+    border-radius: 0 10px 10px 0;
+}
+
+.sidebar-tab:hover {
+    transform: translate(50px, 0);
+}
+
+.sidebar-tab-input:checked + .sidebar-tab-label {
+    background-color: lightslategray !important;
+    border-radius: 0 10px 10px 0;
+}
+
+.sidebar-tab-label {
+    width: 100%;
+    border: 0 !important;
+}

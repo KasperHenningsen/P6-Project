@@ -1,14 +1,11 @@
-<div class="container-fluid">
+<div class="container-flex overflow-hidden">
     <div class="row flex-nowrap">
-        <div class="col-sm-2">
-            <%= render 'nn_model/side_bar' %>
+        <div class="col-sm-2 col-md-2 sidebar">
+            <%= render 'nn_model/sidebar' %>
         </div>
-        <div class="col">
+        <div class="col-sm-10 col-md-10">
             <%= render 'nn_model/temperature_graph' %>
         </div>
-    </div>
-    <div class="progress" style="height: 10px">
-        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
     </div>
   </div>
 </div>
