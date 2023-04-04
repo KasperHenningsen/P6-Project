@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+require 'will_paginate/array'
+
 class TemperaturesController < ApplicationController
   before_action :set_temperature, only: %i[ show edit update destroy ]
 
   # GET /temperatures or /temperatures.json
   def index
-    @temperatures = Temperature.all
+    @temperatures = Temperature.order(date: :asc).paginate(page: params[:page], per_page: 500)
   end
 
   # GET /temperatures/1 or /temperatures/1.json
