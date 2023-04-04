@@ -20,10 +20,6 @@ if __name__ == '__main__':
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
 
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.6, shuffle=False)
-
-    # X_train, X_test = get_standardized_X(X_train, X_test, exclude_cols=['Rain', 'Snow'])
-
     model = GRUNet(input_size=32, hidden_size=128, output_size=1, dropout_prob=0.0, num_layers=2)
 
     train(model, X_train, y_train)
