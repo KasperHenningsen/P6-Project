@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
 from sklego.preprocessing import RepeatingBasisFunction
 from tqdm import tqdm
 
@@ -47,23 +48,21 @@ def get_processed_data(path):
 
 
 def prepare_X_and_y(input, n_steps_in=12, n_steps_out=12, target_column='temp', step_size=1):
+    input_np = input.to_numpy()
+    target_idx = input.columns.get_loc(target_column)
     X, y = [], []
     for i in tqdm(range(0, len(input)-n_steps_in-n_steps_out, step_size), desc='Preparing X and y'):
         X_end_idx = i + n_steps_in
         y_end_idx = X_end_idx + n_steps_out
-        if y_end_idx > len(input):
+        if y_end_idx > len(input_np):
             break
-        X_seq = input[i:X_end_idx]
-        y_seq = input[target_column][X_end_idx:y_end_idx]
+        X_seq = input_np[i:X_end_idx]
+        y_seq = input_np[X_end_idx:y_end_idx, target_idx]
         X.append(X_seq)
         y.append(y_seq)
-    X, y = np.array(X), np.array(y)
-    return X, y
-
+    return np.array(X), np.array(y)
 
 def flatten_X_for_MLP(X):
     n_input = X.shape[1] * X.shape[2]
     X = X.reshape((X.shape[0], n_input))
     return X, n_input
-
-

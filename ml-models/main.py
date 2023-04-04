@@ -1,30 +1,30 @@
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
+from gru.gru import GRUNet
 from training import train
 from mlp.mlp import MLP
 from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
 
 if __name__ == '__main__':
-    SEQUENCE_LENGTH = 12    # Number of time-steps to use for each prediction
-    TARGET_LENGTH = 12      # Number of time-steps to predict
-    TARGET_COLUMN = 'temp'  # The column to predict
+    seq_length = 12         # Number of time-steps to use for each prediction
+    target_length = 12      # Number of time-steps to predict
+    target_col = 'temp'     # The column to predict
 
-    data = get_processed_data('./data/open-weather-aalborg-2000-2022.csv')
-    X, y = prepare_X_and_y(data, n_steps_in=SEQUENCE_LENGTH, n_steps_out=TARGET_LENGTH, target_column='temp')
+    df = get_processed_data('./data/open-weather-aalborg-2000-2022.csv')
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.6)
+    train_df, test_df = train_test_split(df, train_size=0.7, shuffle=False)
 
-    X_train, n_input = flatten_X_for_MLP(X_train)
-    X_test, _ = flatten_X_for_MLP(X_test)
+    X_train, y_train = prepare_X_and_y(train_df, n_steps_in=seq_length, n_steps_out=target_length, target_column=target_col)
 
-    X_scaler = MinMaxScaler(feature_range=(-1, 1))
-    X_train = X_scaler.fit_transform(X_train)
-    X_test = X_scaler.transform(X_test)
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
 
-    model = MLP(n_input, y.shape[1])
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.6, shuffle=False)
+
+    # X_train, X_test = get_standardized_X(X_train, X_test, exclude_cols=['Rain', 'Snow'])
+
+    model = GRUNet(input_size=32, hidden_size=128, output_size=1, dropout_prob=0.0, num_layers=2)
 
     train(model, X_train, y_train)
-
-
 
