@@ -36,14 +36,12 @@ if __name__ == '__main__':
     joblib.dump(scaler, os.path.join(save_path, 'scaler.gz'))
 
     try:
-        train(model, X_train, y_train, batch_size, os.path.join(save_path, 'model.pt'))
+        train(model, X_train, y_train, batch_size)  # , os.path.join(save_path, 'model.pt'))
     except KeyboardInterrupt:
         print("Exiting early from training")
         state_dict = torch.load(os.path.join(save_path, 'model.pt'))
         model.load_state_dict(state_dict)
         model.eval()
-
-    print("\n====================\n")
 
     # Test
     print("\n========== Testing ==========")
