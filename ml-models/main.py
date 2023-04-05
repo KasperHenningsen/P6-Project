@@ -20,7 +20,7 @@ if __name__ == '__main__':
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
 
-    model = GRUNet(input_size=32, hidden_size=128, output_size=1, dropout_prob=0.0, num_layers=2)
+    model = GRUNet(input_size=32, hidden_size=128, output_size=1, dropout_prob=0.2, num_layers=2)
 
     train(model, X_train, y_train)
 
