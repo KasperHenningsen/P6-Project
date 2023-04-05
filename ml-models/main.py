@@ -5,6 +5,7 @@ import torch
 import os
 
 from gru.gru import GRUNet
+from rnn.rnn import RNNNet
 from training import train, test
 from mlp.mlp import MLP
 from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
@@ -15,7 +16,8 @@ if __name__ == '__main__':
     target_col = 'temp'     # The column to predict
     batch_size = 32
 
-    model = GRUNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0, num_layers=1)
+    # model = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    model = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
 
     save_path = os.path.join('./saved-models', model.__class__.__name__)
     os.makedirs(save_path, exist_ok=True)
@@ -25,6 +27,7 @@ if __name__ == '__main__':
     train_df, test_df = train_test_split(df, train_size=0.6, shuffle=False)
 
     # Train
+    print("\n========== Training ==========")
     X_train, y_train = prepare_X_and_y(train_df, n_steps_in=seq_length, n_steps_out=target_length, target_column=target_col)
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
@@ -40,9 +43,8 @@ if __name__ == '__main__':
         model.load_state_dict(state_dict)
         model.eval()
 
-    print("\n====================\n")
-
     # Test
+    print("\n========== Testing ==========")
     X_test, y_test = prepare_X_and_y(test_df, n_steps_in=seq_length, n_steps_out=target_length, target_column=target_col)
     X_test = scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
     test(model, X_test, y_test, batch_size)

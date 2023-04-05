@@ -38,9 +38,12 @@ def train(model, X_train, y_train, batch_size, save_path=None):
             curr_loss += loss.item()
 
         print(f"- avg_loss = {(curr_loss / len(train_loader)):>.3f}")
-        if curr_loss < best_loss and save_path is not None:
-            best_loss = curr_loss
-            torch.save(model.state_dict(), save_path)
+        epoch_avg_loss = curr_loss / len(train_loader)
+
+        if epoch_avg_loss < best_loss:
+            best_loss = epoch_avg_loss
+            if save_path is not None:
+                torch.save(model.state_dict(), save_path)
 
     print(f'End of training\n- best_loss = {best_loss}')
 
