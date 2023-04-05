@@ -5,6 +5,7 @@ import torch
 import os
 
 from gru.gru import GRUNet
+from rnn.rnn import RNNNet
 from training import train, test
 from mlp.mlp import MLP
 from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
@@ -15,7 +16,8 @@ if __name__ == '__main__':
     target_col = 'temp'     # The column to predict
     batch_size = 32
 
-    model = GRUNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0, num_layers=1)
+    # model = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    model = RNNNet(input_size=32, hidden_size=128, output_size=1, dropout_prob=0.2, num_layers=2, nonlinearity='relu')
 
     save_path = os.path.join('./saved-models', model.__class__.__name__)
     os.makedirs(save_path, exist_ok=True)
