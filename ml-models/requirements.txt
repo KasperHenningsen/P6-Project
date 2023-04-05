@@ -4,3 +4,4 @@ scikit-lego~=0.6.14
 numpy==1.24.2
 pandas~=1.5.3
 tqdm~=4.65.0
+joblib~=1.2.0

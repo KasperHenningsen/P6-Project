@@ -1,6 +1,8 @@
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import torch
+import os
 
 from gru.gru import GRUNet
 from training import train, test
@@ -13,7 +15,10 @@ if __name__ == '__main__':
     target_col = 'temp'     # The column to predict
     batch_size = 32
 
-    model = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    model = GRUNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0, num_layers=1)
+
+    save_path = os.path.join('./saved-models', model.__class__.__name__)
+    os.makedirs(save_path, exist_ok=True)
 
     # Prepare data
     df = get_processed_data('./data/open-weather-aalborg-2000-2022.csv')
@@ -23,11 +28,15 @@ if __name__ == '__main__':
     X_train, y_train = prepare_X_and_y(train_df, n_steps_in=seq_length, n_steps_out=target_length, target_column=target_col)
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
+
+    # Save scaler for later use
+    joblib.dump(scaler, os.path.join(save_path, 'scaler.gz'))
+
     try:
-        train(model, X_train, y_train, batch_size, './saved-models/gru01.pt')
+        train(model, X_train, y_train, batch_size)  # , os.path.join(save_path, 'model.pt'))
     except KeyboardInterrupt:
         print("Exiting early from training")
-        state_dict = torch.load('./saved-models/gru01.pt')
+        state_dict = torch.load(os.path.join(save_path, 'model.pt'))
         model.load_state_dict(state_dict)
         model.eval()
 
