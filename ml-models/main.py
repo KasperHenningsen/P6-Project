@@ -1,11 +1,12 @@
 import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-import torch
+import torch.cuda
 import os
 
 from gru.gru import GRUNet
 from rnn.rnn import RNNNet
+from lstm.lstm import LSTM
 from training import train, test
 from mlp.mlp import MLP
 from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
@@ -15,9 +16,9 @@ if __name__ == '__main__':
     target_length = 12      # Number of time-steps to predict
     target_col = 'temp'     # The column to predict
     batch_size = 32
-
     # model = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
-    model = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
+    # model = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
+    model = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
 
     save_path = os.path.join('./saved-models', model.__class__.__name__)
     os.makedirs(save_path, exist_ok=True)
