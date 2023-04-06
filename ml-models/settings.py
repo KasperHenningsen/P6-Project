@@ -6,3 +6,6 @@ if torch.cuda.is_available() and use_cuda_if_available:
 else:
     device = torch.device('cpu')
 print(f'Training on device: {device}')
+
+models_path = '.\\saved-models'
+plots_path = '.\\plots'
