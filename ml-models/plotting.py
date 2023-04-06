@@ -6,6 +6,16 @@ import torch
 import settings
 
 
+def generate_plot(yhat, y, model):
+    plt.plot(yhat.reshape(-1), label='predicted')
+    plt.plot(y.reshape(-1), label='actual')
+    plt.xlabel('Time')
+    plt.ylabel('Temp (°C)')
+    plt.title(f"{model.get_name()}")
+    plt.legend()
+    plt.grid()
+
+
 def plot(model_or_models, X_vals, y, start=0, end=2000, step=1):
     if isinstance(model_or_models, tuple):
         multiplot(model_or_models, X_vals, y, start, end, step)
@@ -16,6 +26,7 @@ def plot(model_or_models, X_vals, y, start=0, end=2000, step=1):
 
     y = y[start:end:step]
     print(f'Plotting {model.get_name()} predictions')
+    plt.figure(figsize=(15, 5))
 
     yhat = model(torch.tensor(X_vals[start:end:step]).to(settings.device))
     yhat = yhat.cpu().detach()
@@ -24,13 +35,7 @@ def plot(model_or_models, X_vals, y, start=0, end=2000, step=1):
         raise ValueError(
             f"The predicted and actual tensors must have the same shape. Shapes are {yhat.shape} and {y.shape}")
 
-    plt.figure(figsize=(15, 5))
-    plt.plot(yhat.reshape(-1), label='predicted')
-    plt.plot(y.reshape(-1), label='actual')
-    plt.xlabel('Time')
-    plt.ylabel('Temp (°C)')
-    plt.legend()
-    plt.grid()
+    generate_plot(yhat, y, model)
 
     # TODO: Infer names (see comment in multiplot) - also, determine if plots should be saved in plots folder instead
     save_path = os.path.join(model.path, 'plot.png')
@@ -65,13 +70,7 @@ def multiplot(models, X_vals, y, start=0, end=2000, step=1):
                 f"The predicted and actual tensors must have the same shape. Shapes are {yhat.shape} and {y.shape}")
 
         plt.subplot(num_models, 1, i + 1)
-        plt.plot(yhat.reshape(-1), label='predicted')
-        plt.plot(y.reshape(-1), label='actual')
-        plt.xlabel('Time')
-        plt.ylabel('Temp (°C)')
-        plt.title(f"{model.get_name()}")
-        plt.legend()
-        plt.grid()
+        generate_plot(yhat, y, model)
 
     plt.tight_layout()
 
