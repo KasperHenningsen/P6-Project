@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import settings
 import torch
@@ -45,7 +47,7 @@ def train(model, X_train, y_train, batch_size, save_path=None):
         if epoch_avg_loss < best_loss:
             best_loss = epoch_avg_loss
             if save_path is not None:
-                torch.save(model.state_dict(), save_path)
+                save_model(model, save_path)
 
     print(f'End of training\n- best_loss = {best_loss}')
 
@@ -66,3 +68,8 @@ def test(model, X_test, y_test, batch_size):
             total_loss += loss.item()
 
     print(f"End of testing\n- loss = {(total_loss / len(dataloader)):>.3f}")
+
+
+def save_model(model, path):
+    os.makedirs(path, exist_ok=True)
+    torch.save(model.state_dict(), os.path.join(path, 'model.pt'))
