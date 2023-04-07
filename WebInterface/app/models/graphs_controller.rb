@@ -1,2 +1,0 @@
-class GraphsController < ApplicationRecord
-end

@@ -1,9 +1,16 @@
 Rails.application.routes.draw do
-  resources :temperatures
-  resources :graphs_controllers
+  root 'pages#Home'
 
-  root 'pages#home'
+  # DataInput
+  get 'data', to: 'data_input#index'
+  get 'data/upload', to: 'data_input#upload_data'
+  get 'data/manual', to: 'data_input#manual_data'
+  get 'data/api', to: 'data_input#api_data'
 
-  get 'models', to: 'nn_model#index'
-  get 'about', to: 'pages#about'
+  # Pages
+  get 'mlp', to: 'pages#mlp'
+  get 'rnn', to: 'pages#rnn'
+  get 'gru', to: 'pages#gru'
+  get 'lstm', to: 'pages#lstm'
+  get 'mtgnn', to: 'pages#mtgnn'
 end

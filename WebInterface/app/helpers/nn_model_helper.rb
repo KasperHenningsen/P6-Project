@@ -1,2 +1,0 @@
-module NnModelHelper
-end

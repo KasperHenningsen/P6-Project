@@ -1,2 +1,63 @@
-<h1>Pages#home</h1>
-<p>Find me in app/views/pages/home.html.erb</p>
+<!-- TODO: Add styling -->
+<div class="container d-flex justify-content-center">
+  <div class="m-4 p-2 text-center" style="background: #dedede; border-radius: 5px;" >
+    <%= form_with url: "/data", method: :get do |form|%>
+
+      <div class="">
+        <h6>Select models:</h6>
+        <div class="px-2 text-start">
+          <%= form.collection_check_boxes :models, @model_list, :downcase, :to_s do |cb| %>
+            <div class="form-check">
+              <%= cb.check_box(class: 'form-check-input') %>
+              <%= cb.label(class: 'form-check-label') %>
+            </div>
+          <% end %>
+
+        </div>
+      </div>
+
+      <div class="pt-3">
+        <h6>Select data option:</h6>
+        <div class="px-2">
+          <%= form.select :data_option, @data_options %>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="d-flex justify-content-center">
+        <%= submit_tag 'Confirm', options = { class: "btn btn-success" } %>
+      </div>
+
+    <% end %>
+  </div>
+</div>
+
+<script type="text/javascript" charset="utf-8">
+    document.addEventListener("DOMContentLoaded", function() {
+        const checkboxes = document.querySelectorAll('input[type=checkbox]');
+        const dataSelector = document.querySelector('#data_selector');
+        const confirmButton = document.querySelector('#confirm_button');
+
+        function enableApplyButton() {
+            let enable = false;
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    enable = true;
+                }
+            });
+            if (dataSelector.value && enable) {
+                confirmButton.disabled = false;
+            } else {
+                confirmButton.disabled = true;
+            }
+        }
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', enableApplyButton);
+        });
+
+        dataSelector.addEventListener('change', enableApplyButton);
+    });
+</script>
+
