@@ -4,10 +4,12 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import torch.cuda
 import os
 
+import settings
 from gru.gru import GRUNet
 from rnn.rnn import RNNNet
 from lstm.lstm import LSTM
 from training import train, test
+from plotting import plot, multiplot
 from mlp.mlp import MLP
 from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
 
@@ -16,12 +18,12 @@ if __name__ == '__main__':
     target_length = 12      # Number of time-steps to predict
     target_col = 'temp'     # The column to predict
     batch_size = 32
-    # model = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
-    # model = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
-    model = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    model = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    model2 = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
+    model3 = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
 
-    save_path = os.path.join('./saved-models', model.__class__.__name__)
-    os.makedirs(save_path, exist_ok=True)
+    os.makedirs(settings.models_path, exist_ok=True)
+    os.makedirs(settings.plots_path, exist_ok=True)
 
     # Prepare data
     df = get_processed_data('./data/open-weather-aalborg-2000-2022.csv')
@@ -34,15 +36,13 @@ if __name__ == '__main__':
     X_train = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
 
     # Save scaler for later use
-    joblib.dump(scaler, os.path.join(save_path, 'scaler.gz'))
+    joblib.dump(scaler, os.path.join(settings.models_path, 'scaler.gz'))
 
     try:
-        train(model, X_train, y_train, batch_size)  # , os.path.join(save_path, 'model.pt'))
+        train(model, X_train, y_train, batch_size, os.path.join(settings.models_path, model.get_name(), 'model.pt'))
     except KeyboardInterrupt:
         print("Exiting early from training")
-        state_dict = torch.load(os.path.join(save_path, 'model.pt'))
-        model.load_state_dict(state_dict)
-        model.eval()
+        model.load_saved_model()
 
     # Test
     print("\n========== Testing ==========")
@@ -50,3 +50,6 @@ if __name__ == '__main__':
     X_test = scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
     test(model, X_test, y_test, batch_size)
 
+    # Plotting
+    print("\n========== Plotting ==========")
+    plot((model, model2, model3), X_test, y_test, start=0, end=100, step=seq_length)
