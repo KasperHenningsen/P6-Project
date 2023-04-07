@@ -54,4 +54,5 @@ if __name__ == '__main__':
 
     # Plotting
     print("\n========== Plotting ==========")
-    plot((model1, model2, model3, model4), X_test, y_test, start=0, end=1000, step=seq_length)
+    plot(model1, X_test, y_test, start=0, end=240, step=seq_length)
+    #plot((model1, model2, model3, model4), X_test, y_test, start=0, end=1000, step=seq_length)

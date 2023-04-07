@@ -9,6 +9,7 @@ class Conv1D(nn.Module):
     def __init__(self, input_channels, kernel_size, output_size=1, dropout_prob=0.2):
         super().__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
+        self.output_size = output_size
         self.conv1d = nn.Conv1d(in_channels=input_channels, out_channels=input_channels,
                                 kernel_size=kernel_size, stride=1, dtype=torch.float64)
         self.relu = nn.ReLU()
@@ -23,7 +24,7 @@ class Conv1D(nn.Module):
         out = self.dropout(out)
         out = out.view(x.size(0), -1)
         out = self.linear(out)
-        return out.reshape(-1, 12)
+        return out.reshape(-1, self.output_size)
 
     def load_saved_model(self):
         state_dict = torch.load(os.path.join(self.path, 'model.pt'))
