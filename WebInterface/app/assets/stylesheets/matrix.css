@@ -1,0 +1,51 @@
+.matrix-container {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr auto auto 1fr;
+}
+
+.matrix {
+    display: grid;
+    text-align: center;
+}
+
+.matrix-label-bottom {
+    padding-top: 5px;
+    padding-left: 10px;
+    transform: rotate(90deg);
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+}
+
+.matrix-label-left {
+    display: flex;
+    padding-right: 5px;
+    align-items: center;
+    font-size: 11px;
+    width: max-content;
+}
+
+.matrix-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    width: 30px;
+}
+
+.matrix-legend {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.matrix-legend-bar {
+    width: 10px;
+    height: 100%;
+    background-image: linear-gradient(red, blue);
+}
+
+.matrix-legend-text {
+    display: grid;
+    grid-template-rows: auto auto auto;
+}

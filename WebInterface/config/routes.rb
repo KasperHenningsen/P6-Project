@@ -13,4 +13,7 @@ Rails.application.routes.draw do
   get 'gru', to: 'pages#gru'
   get 'lstm', to: 'pages#lstm'
   get 'mtgnn', to: 'pages#mtgnn'
+
+  # FeatureMatrix
+  get 'featurematrix', to: 'pages#featurematrix'
 end

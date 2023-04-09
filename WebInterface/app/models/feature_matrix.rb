@@ -1,0 +1,2 @@
+class FeatureMatrix < ApplicationRecord
+end
