@@ -1,13 +1,17 @@
 import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-import torch
+import torch.cuda
 import os
 
+import settings
+from cnn.cnn import Conv1D
 from gru.gru import GRUNet
 from rnn.rnn import RNNNet
-from tcn.tcn import TCN
+from lstm.lstm import LSTM
+from tcn.tcn import TemporalConvolutionNetwork
 from training import train, test
+from plotting import plot, multiplot
 from mlp.mlp import MLP
 from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
 
@@ -16,14 +20,14 @@ if __name__ == '__main__':
     target_length = 12      # Number of time-steps to predict
     target_col = 'temp'     # The column to predict
     batch_size = 32
+    cnn = Conv1D(input_channels=32, kernel_size=12, output_size=target_length, dropout_prob=0)
+    gru = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    rnn = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
+    lstm = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    tcn = TemporalConvolutionNetwork(input_size=32, output_size=1, hidden_size=12)
 
-    # model = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
-    # model = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
-    channel_sizes = [30]*8
-    model = TCN(input_size=32, kernel_size=7, output_size=1, num_channels=channel_sizes, dropout=0.2)
-
-    save_path = os.path.join('./saved-models', model.__class__.__name__)
-    os.makedirs(save_path, exist_ok=True)
+    os.makedirs(settings.models_path, exist_ok=True)
+    os.makedirs(settings.plots_path, exist_ok=True)
 
     # Prepare data
     df = get_processed_data('./data/open-weather-aalborg-2000-2022.csv')
@@ -36,19 +40,21 @@ if __name__ == '__main__':
     X_train = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
 
     # Save scaler for later use
-    joblib.dump(scaler, os.path.join(save_path, 'scaler.gz'))
+    joblib.dump(scaler, os.path.join(settings.models_path, 'scaler.gz'))
 
     try:
-        train(model, X_train, y_train, batch_size)  # , os.path.join(save_path, 'model.pt'))
+        train(tcn, X_train, y_train, batch_size, os.path.join(settings.models_path, tcn.get_name()))
     except KeyboardInterrupt:
         print("Exiting early from training")
-        state_dict = torch.load(os.path.join(save_path, 'model.pt'))
-        model.load_state_dict(state_dict)
-        model.eval()
+        tcn.load_saved_model()
 
     # Test
     print("\n========== Testing ==========")
     X_test, y_test = prepare_X_and_y(test_df, n_steps_in=seq_length, n_steps_out=target_length, target_column=target_col)
     X_test = scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
-    test(model, X_test, y_test, batch_size)
+    test(tcn, X_test, y_test, batch_size)
 
+    # Plotting
+    print("\n========== Plotting ==========")
+    plot(tcn, X_test, y_test, start=0, end=240, step=seq_length)
+    #plot((model1, model2, model3, model4), X_test, y_test, start=0, end=1000, step=seq_length)

@@ -1,4 +1,7 @@
+import os
+
 import numpy as np
+import settings
 import torch
 from torch import nn
 from torch.optim import Adam
@@ -27,6 +30,7 @@ def train(model, X_train, y_train, batch_size, save_path=None):
         model.train()
         curr_loss = 0.0
         for batch, (X_batch, y_batch) in enumerate(tqdm(train_loader, desc=f'Epoch {epoch + 1} of {epochs}')):
+            X_batch, y_batch = X_batch.to(settings.device), y_batch.to(settings.device)
             optimizer.zero_grad()
 
             y_pred = model(X_batch)
@@ -43,7 +47,7 @@ def train(model, X_train, y_train, batch_size, save_path=None):
         if epoch_avg_loss < best_loss:
             best_loss = epoch_avg_loss
             if save_path is not None:
-                torch.save(model.state_dict(), save_path)
+                save_model(model, save_path)
 
     print(f'End of training\n- best_loss = {best_loss}')
 
@@ -58,8 +62,14 @@ def test(model, X_test, y_test, batch_size):
     model.eval()
     with torch.no_grad():
         for batch, (X_batch, y_batch) in enumerate(tqdm(dataloader, desc=f'Testing')):
+            X_batch, y_batch = X_batch.to(settings.device), y_batch.to(settings.device)
             y_pred = model(X_batch)
             loss = loss_fn(y_pred, y_batch)
             total_loss += loss.item()
 
     print(f"End of testing\n- loss = {(total_loss / len(dataloader)):>.3f}")
+
+
+def save_model(model, path):
+    os.makedirs(path, exist_ok=True)
+    torch.save(model.state_dict(), os.path.join(path, 'model.pt'))
