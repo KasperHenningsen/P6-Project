@@ -9,6 +9,7 @@ from cnn.cnn import Conv1D
 from gru.gru import GRUNet
 from rnn.rnn import RNNNet
 from lstm.lstm import LSTM
+from tcn.tcn import TemporalConvolutionNetwork
 from training import train, test
 from plotting import plot, multiplot
 from mlp.mlp import MLP
@@ -19,10 +20,11 @@ if __name__ == '__main__':
     target_length = 12      # Number of time-steps to predict
     target_col = 'temp'     # The column to predict
     batch_size = 32
-    model1 = Conv1D(input_channels=32, kernel_size=12, output_size=target_length, dropout_prob=0)
-    model2 = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
-    model3 = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
-    model4 = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    cnn = Conv1D(input_channels=32, kernel_size=12, output_size=target_length, dropout_prob=0)
+    gru = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    rnn = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
+    lstm = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    tcn = TemporalConvolutionNetwork(input_size=32, output_size=1, hidden_size=12)
 
     os.makedirs(settings.models_path, exist_ok=True)
     os.makedirs(settings.plots_path, exist_ok=True)
@@ -41,18 +43,18 @@ if __name__ == '__main__':
     joblib.dump(scaler, os.path.join(settings.models_path, 'scaler.gz'))
 
     try:
-        train(model1, X_train, y_train, batch_size, os.path.join(settings.models_path, model1.get_name()))
+        train(tcn, X_train, y_train, batch_size, os.path.join(settings.models_path, tcn.get_name()))
     except KeyboardInterrupt:
         print("Exiting early from training")
-        model1.load_saved_model()
+        tcn.load_saved_model()
 
     # Test
     print("\n========== Testing ==========")
     X_test, y_test = prepare_X_and_y(test_df, n_steps_in=seq_length, n_steps_out=target_length, target_column=target_col)
     X_test = scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
-    test(model1, X_test, y_test, batch_size)
+    test(tcn, X_test, y_test, batch_size)
 
     # Plotting
     print("\n========== Plotting ==========")
-    plot(model1, X_test, y_test, start=0, end=240, step=seq_length)
+    plot(tcn, X_test, y_test, start=0, end=240, step=seq_length)
     #plot((model1, model2, model3, model4), X_test, y_test, start=0, end=1000, step=seq_length)
