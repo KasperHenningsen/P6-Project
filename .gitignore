@@ -41,6 +41,7 @@ data/*
 # User-specific stuff
 .idea/
 .vs/
+.vscode/
 
 # Gradle and Maven with auto-import
 # auto-import.

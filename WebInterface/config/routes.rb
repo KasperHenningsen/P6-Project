@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root 'pages#Home'
+  root 'pages#home'
 
   # DataInput
   get 'data', to: 'data_input#index'
@@ -14,6 +14,6 @@ Rails.application.routes.draw do
   get 'lstm', to: 'pages#lstm'
   get 'mtgnn', to: 'pages#mtgnn'
 
-  # FeatureMatrix
+  # Feature Matrix
   get 'featurematrix', to: 'pages#featurematrix'
 end

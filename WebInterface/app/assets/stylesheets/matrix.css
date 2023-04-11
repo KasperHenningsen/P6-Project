@@ -45,7 +45,12 @@
     background-image: linear-gradient(red, blue);
 }
 
-.matrix-legend-text {
+.matrix-legend-text-grid {
     display: grid;
     grid-template-rows: auto auto auto;
+}
+
+.matrix-legend-text {
+    display: flex;
+    justify-content: right;
 }
