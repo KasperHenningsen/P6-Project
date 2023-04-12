@@ -54,7 +54,7 @@ if __name__ == '__main__':
     print("\n========== Testing ==========")
     X_test, y_test = prepare_X_and_y(test_df, n_steps_in=seq_length, n_steps_out=target_length, target_column=target_col)
     X_test = scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
-    test(cnn, X_test, y_test, batch_size)
+    test(train_model, X_test, y_test, batch_size)
 
     # Plotting
     print("\n========== Plotting ==========")
