@@ -1,0 +1,47 @@
+<%= javascript_include_tag 'data_input/manual_data' %>
+
+<div class="container">
+
+  <div class="pt-4 d-flex justify-content-center">
+    <div class="row" style="max-width: fit-content; min-width: 500px; overflow-y: auto; max-height: 70vh">
+      <table class="table table-striped table-dark">
+        <thead class="sticky-top">
+        <tr>
+          <th class="col-1">Date</th>
+          <th class="col-1">Temp</th>
+          <th class="col-1">Dew point</th>
+          <th class="col-1">Pressure</th>
+          <th class="col-1">Humidity</th>
+          <th class="col-1">Rain</th>
+          <th class="col-1">Snow</th>
+        </tr>
+        </thead>
+        <tbody id="date-table-body">
+        <% index = 0 %>
+        <% while compare_dates @date, $end_date %>
+          <tr id="row-<%= index %>">
+            <td><p id="date-<%= index %>"><%= convert_date @date %></p></td>
+            <% @fields.each do |field| %>
+              <td>
+                <input type="number" name="<%= field[0] %>" class="form-control" id="<%= "#{field[1]}-#{index}" %>" style="background-color: rgba(255,255,255,0.2); color: #ffffff">
+              </td>
+            <% end %>
+          </tr>
+          <% @date = increment_date @date %>
+          <% index += 1 %>
+        <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="d-flex justify-content-center">
+    <div class="text-center">
+      <label style="color: darkred" for="submit-button">The content is not modifiable after submission!</label>
+      <br>
+      <button type="submit" class="btn btn-success" onclick="send_data()">Submit</button>
+    </div>
+  </div>
+</div>
