@@ -14,6 +14,7 @@ from training import train, test
 from plotting import plot, multiplot
 from mlp.mlp import MLP
 from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
+from transformer.transformer import TransformerModel
 
 if __name__ == '__main__':
     seq_length = 12         # Number of time-steps to use for each prediction
@@ -25,8 +26,9 @@ if __name__ == '__main__':
     rnn = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
     lstm = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
     tcn = TemporalConvolutionNetwork(input_size=32, output_size=1, hidden_size=12)
+    transformer = TransformerModel(input_size=32, d_model=128, nhead=4, num_layers=6, output_size=12, dropout=0.1)
 
-    train_model = cnn
+    train_model = transformer
 
     os.makedirs(settings.models_path, exist_ok=True)
     os.makedirs(settings.plots_path, exist_ok=True)
