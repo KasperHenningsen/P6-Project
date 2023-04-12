@@ -20,7 +20,7 @@ if __name__ == '__main__':
     target_length = 12      # Number of time-steps to predict
     target_col = 'temp'     # The column to predict
     batch_size = 32
-    cnn = Convolution1D(input_channels=32, hidden_size=12, output_size=1, kernel_size=12, dropout_prob=0)
+    cnn = Convolution1D(input_channels=32, hidden_size=12, kernel_size=12, dropout_prob=0)
     gru = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
     rnn = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
     lstm = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
