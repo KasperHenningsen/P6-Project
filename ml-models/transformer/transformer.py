@@ -56,7 +56,9 @@ class TransformerModel(nn.Module):
 
     def forward(self, x):
         x = self.embedding(x)
+        x = x.permute(1, 0, 2)  # Change to (timesteps, batch_size, features)
         x = self.transformer(x)
+        x = x.permute(1, 0, 2)  # Change back to (batch_size, timesteps, features)
         x = x.mean(dim=1)
         x = self.fc(x)
         return x
