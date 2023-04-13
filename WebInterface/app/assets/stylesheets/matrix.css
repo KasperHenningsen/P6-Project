@@ -1,42 +1,39 @@
 .matrix-container {
     display: grid;
-    grid-template-rows: 1fr;
     grid-template-columns: 1fr auto auto 1fr;
 }
 
 .matrix {
     display: grid;
     text-align: center;
+    width: 100%;
 }
 
 .matrix-label-bottom {
-    padding-top: 5px;
-    padding-left: 10px;
     transform: rotate(90deg);
-    width: 30px;
-    height: 30px;
-    font-size: 11px;
 }
 
-.matrix-label-left {
+.matrix-label {
     display: flex;
     padding-right: 5px;
     align-items: center;
     font-size: 11px;
-    width: max-content;
+    width: auto;
+    height: auto;
 }
 
 .matrix-cell {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 30px;
-    width: 30px;
+    font-size: 10px;
+    aspect-ratio: 1/1;
 }
 
 .matrix-legend {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: max-content max-content;
+    width: auto;
 }
 
 .matrix-legend-bar {
@@ -48,9 +45,11 @@
 .matrix-legend-text-grid {
     display: grid;
     grid-template-rows: auto auto auto;
+    width: max-content;
 }
 
 .matrix-legend-text {
+    width: max-content;
     display: flex;
     justify-content: right;
 }

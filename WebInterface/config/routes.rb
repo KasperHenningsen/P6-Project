@@ -15,5 +15,5 @@ Rails.application.routes.draw do
   get 'mtgnn', to: 'pages#mtgnn'
 
   # Feature Matrix
-  get 'featurematrix', to: 'pages#featurematrix'
+  get 'featurematrix', to: 'feature_matrix#index'
 end

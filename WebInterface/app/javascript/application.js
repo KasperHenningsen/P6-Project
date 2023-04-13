@@ -2,6 +2,3 @@
 import "@hotwired/turbo-rails"
 import "bootstrap"
 import "controllers"
-
-// Custom JS
-import "pages/featurematrix"
