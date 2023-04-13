@@ -9,31 +9,38 @@
     width: 100%;
 }
 
+.matrix-cell {
+    aspect-ratio: 1/1;
+}
+
+.data-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.data-cell:hover {
+    border: solid black 1px;
+}
+
 .matrix-label-bottom {
     transform: rotate(90deg);
+    margin-top: 5px;
 }
 
 .matrix-label {
     display: flex;
     padding-right: 5px;
-    align-items: center;
-    font-size: 11px;
+    font-size: clamp(8px, 1.4vh, 1vw);
     width: auto;
     height: auto;
-}
-
-.matrix-cell {
-    display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    aspect-ratio: 1/1;
 }
 
 .matrix-legend {
     display: grid;
     grid-template-columns: max-content max-content;
-    width: auto;
 }
 
 .matrix-legend-bar {
@@ -49,7 +56,26 @@
 }
 
 .matrix-legend-text {
-    width: max-content;
     display: flex;
     justify-content: right;
+    width: 100%;
+}
+
+.tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    margin-top: 60px;
+}
+
+.data-cell:hover .tooltiptext {
+    visibility: visible;
 }

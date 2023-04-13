@@ -8,16 +8,13 @@ export default class extends Controller {
 
     buildMatrix() {
         let matrixData = JSON.parse(this.data.get("features"));
-
         let features = matrixData[0];
         features[0] = "";
 
         const cellColor = d3.scaleLinear().domain([1, -1]).range(["red", "blue"]);
 
-        console.log(matrixData)
-
         const GRID = document.querySelector("#matrix");
-        GRID.style.gridTemplateColumns = `max-content repeat(${features.length}, minmax(17px, 0.4fr))`;
+        GRID.style.gridTemplateColumns = `max-content repeat(${features.length}, minmax(12px, 2.5vh))`;
 
         const ROWS = features.length;
         for (let i = 1; i <= ROWS; i++) {
@@ -30,18 +27,26 @@ export default class extends Controller {
                     if (j > 0) {
                         content = features[j];
                         cell.classList.add("matrix-label", "matrix-label-bottom");
+                        cell.innerText += content;
                     } else cell.classList.add("matrix-cell")
                 } else if (j === 0) { //left label
                     content = matrixData[i][j];
                     cell.classList.add("matrix-label");
-                } else { //data cells
-                    if (j < i) {
-                        //content = parseFloat(matrixData[i][j]).toFixed(3); //Correlation coefficient
-                        cell.style.backgroundColor = cellColor(matrixData[i][j]);
-                    }
+                    cell.innerText += content;
+                }
+                else if (j < i) { //data cells
+                    //content = parseFloat(matrixData[i][j]).toFixed(3); //Correlation coefficient
+                    cell.style.backgroundColor = cellColor(matrixData[i][j]);
+                    cell.classList.add("matrix-cell", "data-cell");
+
+                    const tooltip = document.createElement("div");
+                    tooltip.classList.add("tooltiptext")
+                    tooltip.innerText += `${features[j] + " / "  + matrixData[i][0] + " \n " + parseFloat(matrixData[i][j]).toPrecision(3)}`
+                    cell.appendChild(tooltip)
+                }
+                else {
                     cell.classList.add("matrix-cell");
                 }
-                cell.innerText += content;
                 GRID.appendChild(cell);
             }
         }
