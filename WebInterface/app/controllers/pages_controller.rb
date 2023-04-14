@@ -1,30 +1,14 @@
 class PagesController < ApplicationController
-  def Home
-    @model_list = get_models
-    @data_options = get_data_options
+  def home
   end
 
-  def mlp
-  end
-
-  def gru
-  end
-
-  def rnn
-  end
-
-  def lstm
-  end
-
-  def mtgnn
+  def options
+    @data_options = get_options
   end
 
   private
-  def get_models
-    return (["GRU", "LSTM", "MLP", "MTGNN", "RNN"]).sort
-  end
 
-  def get_data_options
-    return [["Manual", "manual"], ["From API", "api"], ["Upload dataset", "upload"]]
+  def get_options
+    [["From API", "api"], ["Upload CSV", "csv"], ["Manual entry", "manual"]]
   end
 end

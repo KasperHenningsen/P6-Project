@@ -1,6 +1,8 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3-scale";
 
+// Connects to data-controller="heatmap--featurematrix"
+
 export default class extends Controller {
     connect() {
         this.buildMatrix()
