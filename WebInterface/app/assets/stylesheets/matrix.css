@@ -24,12 +24,30 @@
     border: solid black 1px;
 }
 
-.matrix-label-bottom {
-    transform: rotate(90deg);
-    margin-top: 5px;
+.data-cell.lowlight {
+    opacity: 33%;
 }
 
-.matrix-label {
+.data-cell.border-hor, .label.border-hor, .container-bottom.border-hor {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.data-cell.border-ver, .label.border-ver, .container-bottom.border-ver {
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+}
+
+.label.bottom {
+    margin-top: 10px;
+    transform: rotate(90deg);
+}
+
+.container-bottom {
+    height: calc(100% + 5px);
+}
+
+.matrix .label {
     display: flex;
     padding-right: 5px;
     font-size: clamp(8px, 1.4vh, 1vw);
@@ -41,21 +59,22 @@
 .matrix-legend {
     display: grid;
     grid-template-columns: max-content max-content;
+    height: 92%;
 }
 
-.matrix-legend-bar {
+.matrix-legend .bar {
     width: 10px;
     height: 100%;
     background-image: linear-gradient(red, blue);
 }
 
-.matrix-legend-text-grid {
+.matrix-legend .text-grid {
     display: grid;
     grid-template-rows: auto auto auto;
     width: max-content;
 }
 
-.matrix-legend-text {
+.text-grid .text {
     display: flex;
     justify-content: right;
     width: 100%;

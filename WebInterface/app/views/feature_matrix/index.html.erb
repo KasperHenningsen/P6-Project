@@ -1,19 +1,25 @@
-<div class="p-4 matrix-container" id="matrix-container" data-controller="heatmap--featurematrix" data-heatmap--featurematrix-features='<%= @features %>'>
-  <div></div>
-  <div class="matrix" id="matrix"></div>
-  <div class="matrix-legend" id="legend" style="visibility: hidden">
-    <div class="matrix-legend-bar" id="legend-bar"></div>
-    <div class="matrix-legend-text-grid" id="legend-text">
-      <div class="matrix-legend-text" style="align-items: start;">
-        <div>1</div>
-      </div>
-      <div class="matrix-legend-text" style="align-items: center;">
-        <div>0</div>
-      </div>
-      <div class="matrix-legend-text" style="align-items: end;">
-        <div>-1</div>
+<div data-controller="heatmap--featurematrix" data-heatmap--featurematrix-features='<%= @features %>'>
+  <div class="p-2 text-center">
+    <label for="matrixSearch">Matrix Search</label>
+    <input id="matrixSearch" type="number" autocomplete="off" placeholder="Enter a number (e.g. 0.5)" data-action="change->heatmap--featurematrix#searchMatrix">
+  </div>
+  <div class="p-4 matrix-container" id="matrix-container">
+    <div></div>
+    <div class="matrix" id="matrix"></div>
+    <div class="matrix-legend" id="legend" style="visibility: hidden">
+      <div class="bar" id="legend-bar"></div>
+      <div class="text-grid" id="legend-text">
+        <div class="text" style="align-items: start;">
+          <div>1</div>
+        </div>
+        <div class="text" style="align-items: center;">
+          <div>0</div>
+        </div>
+        <div class="text" style="align-items: end;">
+          <div>-1</div>
+        </div>
       </div>
     </div>
+    <div></div>
   </div>
-  <div></div>
 </div>
