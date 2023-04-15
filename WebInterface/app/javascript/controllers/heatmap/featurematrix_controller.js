@@ -14,7 +14,6 @@ export default class extends Controller {
 
     initializeData() {
         this.matrixData = JSON.parse(this.data.get("features"));
-
         this.features = this.matrixData[0];
         this.features[0] = "";
     }
@@ -30,6 +29,7 @@ export default class extends Controller {
             for (let j = 0; j < ROWS; j++) {
                 const cell = document.createElement("div");
                 let id = i + "/" + (j + 1);
+
                 cell.setAttribute("id", `${id}`)
                 cell.style.gridArea = `${i} / ${j + 1}`;
                 let content = "";
@@ -38,11 +38,14 @@ export default class extends Controller {
                     if (j > 0) {
                         const label = document.createElement("div");
                         content = this.features[j];
-                        label.classList.add("label", "bottom");
                         label.innerText += content;
+
+                        label.classList.add("label", "bottom");
                         cell.classList.add("container-bottom");
                         cell.appendChild(label);
-                    } else cell.classList.add("matrix-cell") // Corner cell
+                    } else {
+                        cell.classList.add("matrix-cell") // Corner cell
+                    }
                 } else if (j === 0) { //left label
                     content = this.matrixData[i][j];
                     cell.classList.add("label");
