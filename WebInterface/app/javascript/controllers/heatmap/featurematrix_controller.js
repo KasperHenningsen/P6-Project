@@ -6,6 +6,7 @@ import * as d3 from "d3-scale";
 export default class extends Controller {
     matrixData;
     features;
+    prevSearch;
 
     connect() {
         this.initializeData();
@@ -72,7 +73,12 @@ export default class extends Controller {
 
     searchMatrix(event) {
         if (event.currentTarget.value) {
-            this.clearLowlights();
+            if (event.currentTarget.value < this.prevSearch) {
+                this.clearLowlights()
+            }
+
+            this.prevSearch = event.currentTarget.value;
+            this.prevSearch = event.currentTarget.value;
             const ROWS = this.features.length;
             for (let i = 1; i < ROWS; i++) {
                 for (let j = 0; j < i; j++) {
