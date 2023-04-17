@@ -1,19 +1,18 @@
 import joblib
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-import torch.cuda
+from sklearn.preprocessing import StandardScaler
 import os
 
 import settings
-from cnn.cnn import Conv1D
-from gru.gru import GRUNet
-from rnn.rnn import RNNNet
-from lstm.lstm import LSTM
-from tcn.tcn import TemporalConvolutionNetwork
+from baselines.cnn import Conv1D
+from baselines.gru import GRUNet
+from baselines.rnn import RNNNet
+from baselines.lstm import LSTM
+from baselines.tcn import TemporalConvolutionNetwork
+from mtgnn.mtgnn import MTGNN
 from training import train, test
-from plotting import plot, multiplot
-from mlp.mlp import MLP
-from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
+from plotting import plot
+from data_utils import get_processed_data, prepare_X_and_y
 
 if __name__ == '__main__':
     seq_length = 12         # Number of time-steps to use for each prediction
@@ -25,6 +24,7 @@ if __name__ == '__main__':
     rnn = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
     lstm = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
     tcn = TemporalConvolutionNetwork(input_size=32, output_size=1, hidden_size=12)
+    mtgnn = MTGNN(num_features=32, seq_length=12, is_training=True, use_output_convolution=False)
 
     os.makedirs(settings.models_path, exist_ok=True)
     os.makedirs(settings.plots_path, exist_ok=True)
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     joblib.dump(scaler, os.path.join(settings.models_path, 'scaler.gz'))
 
     try:
-        train(tcn, X_train, y_train, batch_size, os.path.join(settings.models_path, tcn.get_name()))
+        train(mtgnn, X_train, y_train, batch_size, os.path.join(settings.models_path, mtgnn.get_name()))
     except KeyboardInterrupt:
         print("Exiting early from training")
         tcn.load_saved_model()
