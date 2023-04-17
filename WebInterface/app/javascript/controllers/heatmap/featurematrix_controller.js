@@ -84,7 +84,7 @@ export default class extends Controller {
             const ROWS = this.features.length;
             for (let i = 1; i < ROWS; i++) {
                 for (let j = 0; j < i; j++) {
-                    if (Number(this.matrixData[i][j]) < event.currentTarget.value) {
+                    if (Math.abs(Number(this.matrixData[i][j])) < event.currentTarget.value) {
                         let id = i + "/" + (j + 1);
                         let TARGET = document.querySelector("#" + CSS.escape(id));
                         if (TARGET) TARGET.classList.add("lowlight");
