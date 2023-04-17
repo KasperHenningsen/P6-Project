@@ -21,7 +21,6 @@ class MTGNN(nn.Module):
                  tan_alpha=3,
                  prop_alpha=0.05,
                  dropout=0.2,
-                 is_training=False,
                  use_output_convolution=True
                  ):
         super(MTGNN, self).__init__()
@@ -30,11 +29,9 @@ class MTGNN(nn.Module):
         self.seq_length = seq_length
         self.num_layers = num_layers
         self.dropout = dropout
-        self.is_training = is_training
         self.use_output_convolution = use_output_convolution
         self.build_adj_matrix = build_adj_matrix
         self.nodes = torch.arange(num_features).to(settings.device)
-
         self.filter_convs = nn.ModuleList()
         self.gate_convs = nn.ModuleList()
         self.residual_convs = nn.ModuleList()
@@ -100,12 +97,12 @@ class MTGNN(nn.Module):
         adp = self.graph_learning_layer(self.nodes) if self.build_adj_matrix else None
 
         out = self.start_conv(x)
-        skip = self.skip0(F.dropout(x, self.dropout, training=self.is_training))
+        skip = self.skip0(F.dropout(x, self.dropout, training=self.training))
         for i in range(self.num_layers):
             residual = out
             filter = torch.tanh(self.filter_convs[i](out))
             gate = torch.sigmoid(self.gate_convs[i](out))
-            out = F.dropout(filter * gate, self.dropout, training=self.is_training)
+            out = F.dropout(filter * gate, self.dropout, training=self.training)
 
             s = self.skip_convs[i](out)
             skip = skip + s
