@@ -15,6 +15,9 @@ def get_processed_data(path):
     # Fill NaN values with 0
     df = df.fillna(0)
 
+    # Set the index of the dataframe to dates
+    df = df.set_index(dates)
+
     # One-hot encoding of weather_main enum
     df = pd.concat([df, pd.get_dummies(df['weather_main'])], axis=1)
     df = df.drop(columns=['weather_main', 'Clear', 'Clouds', 'Drizzle', 'Dust', 'Fog', 'Haze', 'Mist', 'Thunderstorm',

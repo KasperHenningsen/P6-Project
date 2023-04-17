@@ -2,6 +2,7 @@ import os
 
 import matplotlib.pyplot as plt
 import torch
+from scipy.ndimage import gaussian_filter1d
 
 import settings
 
@@ -78,3 +79,41 @@ def multiplot(models, X_vals, y, start=0, end=2000, step=1):
     plt.savefig(save_path)
     plt.show()
     print(f'Done! Plot saved at {save_path}')
+
+
+def plot_rbf_small(df):
+    # Interpolate missing values in columns 20 to 32
+    cols_to_interpolate = df.columns[20:26]
+    df[cols_to_interpolate] = df[cols_to_interpolate].interpolate(method='linear', limit_direction='forward', axis=0)
+
+    # Apply a Gaussian filter to columns 20 to 32
+    df[cols_to_interpolate] = gaussian_filter1d(df[cols_to_interpolate], sigma=8, axis=0)
+
+    plt.rcParams['figure.figsize'] = [7, 3.5]
+    plt.figure().tight_layout()
+    df.iloc[:4344, 20:26].plot()
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.15), ncol=6)
+    plt.xlabel("")
+
+    save_path = os.path.join(settings.plots_path, 'RBF small.png')
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.show()
+
+
+def plot_rbf_large(df):
+    # Interpolate missing values in columns 20 to 32
+    cols_to_interpolate = df.columns[20:32]
+    df[cols_to_interpolate] = df[cols_to_interpolate].interpolate(method='linear', limit_direction='forward', axis=0)
+
+    # Apply a Gaussian filter to columns 20 to 32
+    df[cols_to_interpolate] = gaussian_filter1d(df[cols_to_interpolate], sigma=8, axis=0)
+
+    plt.rcParams['figure.figsize'] = [13.75, 4]
+    plt.figure().tight_layout()
+    df.iloc[:8760, 20:32].plot()
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1), ncol=12)
+    plt.xlabel("")
+
+    save_path = os.path.join(settings.plots_path, 'RBF large.png')
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.show()

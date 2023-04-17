@@ -11,7 +11,7 @@ from rnn.rnn import RNNNet
 from lstm.lstm import LSTM
 from tcn.tcn import TemporalConvolutionNetwork
 from training import train, test
-from plotting import plot, multiplot
+from plotting import plot, multiplot, plot_rbf_small, plot_rbf_large
 from mlp.mlp import MLP
 from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
 from transformer.transformer import TransformerModel
@@ -35,6 +35,10 @@ if __name__ == '__main__':
 
     # Prepare data
     df = get_processed_data('./data/open-weather-aalborg-2000-2022.csv')
+
+    # Generate RBF plot
+    #plot_rbf_small(df)
+
     train_df, test_df = train_test_split(df, train_size=0.6, shuffle=False)
 
     # Train
@@ -56,9 +60,12 @@ if __name__ == '__main__':
     print("\n========== Testing ==========")
     X_test, y_test = prepare_X_and_y(test_df, n_steps_in=seq_length, n_steps_out=target_length, target_column=target_col)
     X_test = scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
-    test(train_model, X_test, y_test, batch_size)
+    try:
+        test(train_model, X_test, y_test, batch_size)
+    except KeyboardInterrupt:
+        print("Exiting early from testing")
 
     # Plotting
     print("\n========== Plotting ==========")
     plot(train_model, X_test, y_test, start=0, end=240, step=seq_length)
-    #plot((model1, model2, model3, model4), X_test, y_test, start=0, end=1000, step=seq_length)
+    #plot((cnn, gru, rnn, lstm, tcn, transformer), X_test, y_test, start=0, end=240, step=seq_length)
