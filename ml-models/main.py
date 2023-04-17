@@ -1,21 +1,19 @@
 import joblib
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-import torch.cuda
+from sklearn.preprocessing import StandardScaler
 import os
 
 import settings
-from baselines.cnn import Conv1D
+from baselines.cnn import Convolution1D
 from baselines.gru import GRUNet
 from baselines.rnn import RNNNet
 from baselines.lstm import LSTM
-from baselines.mlp import MLP
 from baselines.tcn import TemporalConvolutionNetwork
-from transformer.transformer import TransformerModel
+from baselines.transformer import TransformerModel
 from mtgnn.mtgnn import MTGNN
 from training import train, test
-from plotting import plot, multiplot, plot_rbf_small, plot_rbf_large
-from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
+from utils.plotting import plot
+from utils.data_utils import get_processed_data, prepare_X_and_y
 
 if __name__ == '__main__':
     seq_length = 12         # Number of time-steps to use for each prediction

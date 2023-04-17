@@ -8,7 +8,7 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from datasets import RegressionDataset
+from utils.datasets import RegressionDataset
 
 
 def train(model, X_train, y_train, batch_size, save_path=None):
