@@ -23,6 +23,7 @@ class LSTM(nn.Module):
         self.batch_size = x.shape[0]
         h0, c0 = self.init_internal_states()
         out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
+        out = self.relu(out)
         out = self.linear(out)
         return out.reshape(-1, 12)
 
