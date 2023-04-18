@@ -8,6 +8,7 @@ import os
 import settings
 from baselines.cnn import Convolution1D
 from baselines.gru import GRUNet
+from baselines.mlp import MLP
 from baselines.rnn import RNNNet
 from baselines.lstm import LSTM
 from baselines.tcn import TemporalConvolutionNetwork
@@ -28,6 +29,7 @@ if __name__ == '__main__':
     train_size = 0.7
     grad_clipping = None
     cnn = Convolution1D(input_channels=32, hidden_size=12, kernel_size=12, dropout_prob=0)
+    mlp = MLP(input_size=32, hidden_size=256, output_size=1, num_layers=1, seq_length=seq_length)
     gru = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
     rnn = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3)
     lstm = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
