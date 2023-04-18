@@ -19,14 +19,13 @@ def train(model, X_train, y_train, batch_size, learning_rate, epochs, save_path=
 
     # Define training parameters
     mae_loss = nn.L1Loss().to(settings.device)
-    mape_loss = MeanAbsolutePercentageError()
+    mape_loss = MeanAbsolutePercentageError().to(settings.device)
     mse_loss = nn.MSELoss().to(settings.device)
 
     def rmse_loss(x, y):
         return torch.sqrt(mse_loss(x, y)).to(settings.device)
 
-    optimizer = Adam(model.parameters(), lr=0.0001)
-    epochs = 5
+    optimizer = Adam(model.parameters(), lr=learning_rate)
 
     best_loss = np.Infinity
     best_mape = np.Infinity
@@ -82,9 +81,9 @@ def train(model, X_train, y_train, batch_size, learning_rate, epochs, save_path=
 def test(model, X_test, y_test, batch_size):
     dataset = RegressionDataset(X_test, y_test)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    loss_fn = nn.L1Loss()
-    mape = MeanAbsolutePercentageError()
-    mse = nn.MSELoss()
+    loss_fn = nn.L1Loss().to(settings.device)
+    mape = MeanAbsolutePercentageError().to(settings.device)
+    mse = nn.MSELoss().to(settings.device)
 
     def rmse(x, y):
         return torch.sqrt(mse(x, y))
