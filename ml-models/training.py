@@ -18,12 +18,12 @@ def train(model, X_train, y_train, batch_size, save_path=None, grad_clipping=Non
 
     # Define training parameters
     torch.manual_seed(0)
-    mae_loss = nn.L1Loss()
-    mape_loss = MeanAbsolutePercentageError()
-    mse_loss = nn.MSELoss()
+    mae_loss = nn.L1Loss().to(settings.device)
+    mape_loss = MeanAbsolutePercentageError().to(settings.device)
+    mse_loss = nn.MSELoss().to(settings.device)
 
     def rmse_loss(x, y):
-        return torch.sqrt(mse_loss(x, y))
+        return torch.sqrt(mse_loss(x, y)).to(settings.device)
 
     optimizer = Adam(model.parameters(), lr=0.00001)
     epochs = 20
