@@ -6,13 +6,16 @@ from torch import nn
 
 
 class LSTM(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size=1, dropout_prob=0.2,
-                 num_layers=2):
+    def __init__(self, input_size, hidden_size, output_size=1, dropout_prob=0.2, num_layers=2):
         super().__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.batch_size = 0
+        self.input_size = input_size
+        self.output_size = output_size
+        self.dropout = dropout_prob
+
         self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size,
                             num_layers=num_layers, batch_first=True, dropout=dropout_prob, dtype=torch.float64)
         self.relu = nn.ReLU()
@@ -37,5 +40,7 @@ class LSTM(nn.Module):
         self.load_state_dict(state_dict)
         self.eval()
 
-    def get_name(self):
-        return self.__class__.__name__
+    @staticmethod
+    def get_name():
+        return __class__.__name__
+
