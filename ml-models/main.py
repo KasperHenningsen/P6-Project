@@ -1,34 +1,34 @@
 import joblib
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-import torch.cuda
+from sklearn.preprocessing import StandardScaler
 import os
 
 import settings
-from cnn.cnn import Convolution1D
-from gru.gru import GRUNet
-from rnn.rnn import RNNNet
-from lstm.lstm import LSTM
-from tcn.tcn import TemporalConvolutionNetwork
+from baselines.cnn import Convolution1D
+from baselines.gru import GRUNet
+from baselines.rnn import RNNNet
+from baselines.lstm import LSTM
+from baselines.tcn import TemporalConvolutionNetwork
+from baselines.transformer import TransformerModel
+from mtgnn.mtgnn import MTGNN
 from training import train, test
-from plotting import plot, multiplot, plot_rbf_small, plot_rbf_large
-from mlp.mlp import MLP
-from data_utils import get_processed_data, prepare_X_and_y, flatten_X_for_MLP
-from transformer.transformer import TransformerModel
+from utils.plotting import plot, plot_loss_history
+from utils.data_utils import get_processed_data, prepare_X_and_y
 
 if __name__ == '__main__':
     seq_length = 12         # Number of time-steps to use for each prediction
     target_length = 12      # Number of time-steps to predict
     target_col = 'temp'     # The column to predict
-    batch_size = 32
+    batch_size = 8
     cnn = Convolution1D(input_channels=32, hidden_size=12, kernel_size=12, dropout_prob=0)
     gru = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
     rnn = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='relu')
     lstm = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
     tcn = TemporalConvolutionNetwork(input_size=32, output_size=1, hidden_size=12)
+    mtgnn = MTGNN(num_features=32, seq_length=12, use_output_convolution=False, dropout=0.3)
     transformer = TransformerModel(input_size=32, d_model=128, nhead=4, num_layers=6, output_size=12, dropout=0.1)
 
-    train_model = transformer
+    train_model = mtgnn
 
     os.makedirs(settings.models_path, exist_ok=True)
     os.makedirs(settings.plots_path, exist_ok=True)
@@ -51,7 +51,8 @@ if __name__ == '__main__':
     joblib.dump(scaler, os.path.join(settings.models_path, 'scaler.gz'))
 
     try:
-        train(train_model, X_train, y_train, batch_size, train_model.path)
+        losses = train(train_model, X_train, y_train, batch_size, train_model.path)
+        plot_loss_history(train_model, losses)
     except KeyboardInterrupt:
         print("Exiting early from training")
         train_model.load_saved_model()
