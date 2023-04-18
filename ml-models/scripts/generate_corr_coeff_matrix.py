@@ -1,5 +1,4 @@
-import sys
-from data_utils import get_processed_data
+from utils.data_utils import get_processed_data
 
 
 if __name__ == '__main__':

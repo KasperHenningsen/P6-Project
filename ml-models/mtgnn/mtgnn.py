@@ -18,9 +18,13 @@ class MTGNN(nn.Module):
                  skip_channels=64,
                  end_channels=128,
                  build_adj_matrix=True,
+                 subgraph_size=20,
+                 subgraph_node_dim=40,
+                 subgraph_depth=2,
                  tan_alpha=3,
                  prop_alpha=0.05,
                  dropout=0.2,
+                 dilation_exponential=2,
                  use_output_convolution=True
                  ):
         super(MTGNN, self).__init__()
@@ -31,6 +35,15 @@ class MTGNN(nn.Module):
         self.dropout = dropout
         self.use_output_convolution = use_output_convolution
         self.build_adj_matrix = build_adj_matrix
+        self.num_features = num_features
+        self.conv_channels = conv_channels
+        self.residual_channels = residual_channels
+        self.skip_channels = skip_channels
+        self.end_channels = end_channels
+        self.tan_alpha = tan_alpha
+        self.prop_alpha = prop_alpha
+        self.dropout = dropout
+
         self.nodes = torch.arange(num_features).to(settings.device)
         self.filter_convs = nn.ModuleList()
         self.gate_convs = nn.ModuleList()
@@ -43,12 +56,9 @@ class MTGNN(nn.Module):
         # 1x1 convolution
         self.start_conv = nn.Conv2d(in_channels=input_size, out_channels=residual_channels, kernel_size=(1, 1), dtype=torch.float64)
 
-        subgraph_size, node_dim = 20, 40
-        graph_conv_network_depth = 2
-        self.graph_learning_layer = GraphLearningLayer(num_features, k=subgraph_size, dim=node_dim, alpha=tan_alpha)
+        self.graph_learning_layer = GraphLearningLayer(num_features, k=subgraph_size, dim=subgraph_node_dim, alpha=tan_alpha)
 
         kernel_size = 7
-        dilation_exponential = 2
         # receptive field = how much of the input sequence is actually used for forecasting
         self.receptive_field = int(1 + (kernel_size-1) * (dilation_exponential ** num_layers-1) / (dilation_exponential-1))
 
@@ -67,8 +77,8 @@ class MTGNN(nn.Module):
             self.normalization.append(LayerNormalization((residual_channels, num_features, z), elementwise_affine=False))
 
             if build_adj_matrix:
-                self.graph_convs_1.append(MixHopPropagationLayer(conv_channels, residual_channels, depth=graph_conv_network_depth, alpha=prop_alpha))
-                self.graph_convs_2.append(MixHopPropagationLayer(conv_channels, residual_channels, depth=graph_conv_network_depth, alpha=prop_alpha))
+                self.graph_convs_1.append(MixHopPropagationLayer(conv_channels, residual_channels, depth=subgraph_depth, alpha=prop_alpha))
+                self.graph_convs_2.append(MixHopPropagationLayer(conv_channels, residual_channels, depth=subgraph_depth, alpha=prop_alpha))
 
             dilation *= dilation_exponential
 
@@ -125,23 +135,6 @@ class MTGNN(nn.Module):
         # at this point the output shape is (batch_size, 1, time_steps, features)
         out = torch.squeeze(out)  # reshape to (batch_size, time_steps, features)
 
-        """ here we can try either picking just the first element in the last dimension, or do a 1x1 convolution to reduce it to 1
-        - some ChatGPT comments on this:
-        
-        Taking just the first feature in each time-step in the output tensor could work in some cases, but whether it yields 
-        similar results to using a convolutional layer depends on the specific problem and dataset you're working with.
-        
-        If the target feature you're interested in is always the first feature in each time-step of the output tensor, 
-        then taking just the first feature would give you the information you need. However, if the position of the target 
-        feature changes within each time-step, or if there is noise or other features that are correlated with the target feature, 
-        then taking just the first feature may not be sufficient.
-        
-        Using a convolutional layer, on the other hand, can help capture correlations between different features in 
-        each time-step and across time-steps. It can also help reduce noise and extract more meaningful features. 
-        However, adding a convolutional layer also increases the complexity and training time of your model, so it's
-        important to weigh the benefits and drawbacks for your specific use case.
-        """
-
         if self.use_output_convolution:
             # transpose to (batch_size, features, time_steps) to do 1x1 convolution along feature dimension
             out = out.transpose(1, 2)
@@ -158,5 +151,6 @@ class MTGNN(nn.Module):
         self.load_state_dict(state_dict)
         self.eval()
 
-    def get_name(self):
-        return self.__class__.__name__
+    @staticmethod
+    def get_name():
+        return __class__.__name__

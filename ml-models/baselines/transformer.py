@@ -49,6 +49,14 @@ class TransformerModel(nn.Module):
     def __init__(self, input_size, d_model, nhead, num_layers, output_size, dim_feedforward=2048, dropout=0.1):
         super().__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
+        self.input_size = input_size
+        self.d_model = d_model
+        self.nhead = nhead
+        self.num_layers = num_layers
+        self.output_size = output_size
+        self.dim_feedforward = dim_feedforward
+        self.dropout = dropout
+
         self.embedding = nn.Linear(input_size, d_model, dtype=torch.float64)
         self.transformer = TransformerEncoder(d_model, nhead, num_layers, dim_feedforward, dropout)
         self.fc = nn.Linear(d_model, output_size, dtype=torch.float64)
@@ -68,5 +76,6 @@ class TransformerModel(nn.Module):
         self.load_state_dict(state_dict)
         self.eval()
 
-    def get_name(self):
-        return self.__class__.__name__
+    @staticmethod
+    def get_name():
+        return __class__.__name__
