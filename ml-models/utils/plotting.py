@@ -123,5 +123,4 @@ def plot_loss_history(model, losses):
     plt.xlabel("Epoch")
     plt.ylabel("Loss (Mean Absolute Error)")
     plt.plot(losses)
-    plt.savefig(os.path.join(model.path, 'plot-losses-01.png'))
-    plt.show()
+    plt.savefig(os.path.join(model.path, 'plot-train-loss.png'))

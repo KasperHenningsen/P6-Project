@@ -10,25 +10,27 @@ from tqdm import tqdm
 from torchmetrics import MeanAbsolutePercentageError
 
 from utils.datasets import RegressionDataset
+from utils.plotting import plot_loss_history
 
 
-def train(model, X_train, y_train, batch_size, save_path=None, grad_clipping=None):
+def train(model, X_train, y_train, batch_size, learning_rate, epochs, save_path=None, grad_clipping=None):
     train_dataset = RegressionDataset(X_train, y_train)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     # Define training parameters
-    torch.manual_seed(0)
     mae_loss = nn.L1Loss().to(settings.device)
-    mape_loss = MeanAbsolutePercentageError().to(settings.device)
+    mape_loss = MeanAbsolutePercentageError()
     mse_loss = nn.MSELoss().to(settings.device)
 
     def rmse_loss(x, y):
         return torch.sqrt(mse_loss(x, y)).to(settings.device)
 
-    optimizer = Adam(model.parameters(), lr=0.00001)
-    epochs = 20
+    optimizer = Adam(model.parameters(), lr=0.0001)
+    epochs = 5
 
     best_loss = np.Infinity
+    best_mape = np.Infinity
+    best_rmse = np.Infinity
     losses = []
 
     print('Begin training')
@@ -67,19 +69,29 @@ def train(model, X_train, y_train, batch_size, save_path=None, grad_clipping=Non
 
         if epoch_avg_loss < best_loss:
             best_loss = epoch_avg_loss
+            best_mape = epoch_avg_mape
+            best_rmse = epoch_avg_rmse
             if save_path is not None:
                 save_model(model, save_path)
 
-    print(f'End of training\n- best MAE = {best_loss}')
-    return losses
+    print(f'End of training\n- MAE = {best_loss:>.3f}, MAPE = {best_mape:>.3f}, RMSE = {best_rmse:>.3f}')
+    plot_loss_history(model, losses)
+    return [best_loss, best_mape, best_rmse]
 
 
 def test(model, X_test, y_test, batch_size):
     dataset = RegressionDataset(X_test, y_test)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     loss_fn = nn.L1Loss()
+    mape = MeanAbsolutePercentageError()
+    mse = nn.MSELoss()
+
+    def rmse(x, y):
+        return torch.sqrt(mse(x, y))
 
     total_loss = 0.0
+    total_mape = 0.0
+    total_rmse = 0.0
     print('Begin testing')
     model.eval()
     with torch.no_grad():
@@ -88,8 +100,11 @@ def test(model, X_test, y_test, batch_size):
             y_pred = model(X_batch)
             loss = loss_fn(y_pred, y_batch)
             total_loss += loss.item()
+            total_mape += mape(y_pred, y_batch).item()
+            total_rmse += rmse(y_pred, y_batch).item()
 
-    print(f"End of testing\n- loss = {(total_loss / len(dataloader)):>.3f}")
+    print(f"End of testing\n- MAE = {(total_loss/len(dataloader)):>.3f}, MAPE = {(total_mape/len(dataloader)):>.3f}, RMSE = {(total_rmse/len(dataloader)):>.3f}")
+    return [total_loss, total_mape, total_rmse]
 
 
 def save_model(model, path):

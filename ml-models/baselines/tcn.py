@@ -11,6 +11,12 @@ class TemporalConvolutionNetwork(nn.Module):
     def __init__(self, input_size, output_size, hidden_size=12, depth=4, kernel_size=3, dilation_base=2):
         super(TemporalConvolutionNetwork, self).__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
+        self.input_size = input_size
+        self.output_size = output_size
+        self.hidden_size = hidden_size
+        self.depth = depth
+        self.kernel_size = kernel_size
+        self.dilation_base = dilation_base
 
         self.residual_blocks = nn.Sequential(
             ResidualBlock(input_size, hidden_size, dilation=1, kernel_size=kernel_size)
@@ -31,8 +37,9 @@ class TemporalConvolutionNetwork(nn.Module):
         self.load_state_dict(state_dict)
         self.eval()
 
-    def get_name(self):
-        return self.__class__.__name__
+    @staticmethod
+    def get_name():
+        return __class__.__name__
 
 
 class ResidualBlock(nn.Module):
