@@ -7,19 +7,21 @@ from torch import nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from torchmetrics import MeanAbsolutePercentageError
+from torchmetrics import SymmetricMeanAbsolutePercentageError
 
 from utils.datasets import RegressionDataset
 from utils.plotting import plot_loss_history
 
 
-def train(model, X_train, y_train, batch_size, learning_rate, epochs, save_path=None, grad_clipping=None):
+def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epochs, save_path=None, grad_clipping=None):
     train_dataset = RegressionDataset(X_train, y_train)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=torch.Generator(device=settings.device))
+    val_dataset = RegressionDataset(X_val, y_val)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, generator=torch.Generator(device=settings.device))
 
     # Define training parameters
     mae_loss = nn.L1Loss().to(settings.device)
-    mape_loss = MeanAbsolutePercentageError().to(settings.device)
+    smape_loss = SymmetricMeanAbsolutePercentageError().to(settings.device)
     mse_loss = nn.MSELoss().to(settings.device)
 
     def rmse_loss(x, y):
@@ -27,25 +29,25 @@ def train(model, X_train, y_train, batch_size, learning_rate, epochs, save_path=
 
     optimizer = Adam(model.parameters(), lr=learning_rate)
 
-    best_loss = np.Infinity
-    best_mape = np.Infinity
-    best_rmse = np.Infinity
+    best_val_loss = np.Infinity
+    best_val_smape = np.Infinity
+    best_val_rmse = np.Infinity
     losses = []
 
     print('Begin training')
     # training loop
     for epoch in range(epochs):
         model.train()
-        curr_loss = 0.0
-        curr_mape = 0.0
-        curr_rmse = 0.0
-        for batch, (X_batch, y_batch) in enumerate(tqdm(train_loader, desc=f'Epoch {epoch + 1} of {epochs}')):
+        curr_train_loss = 0.0
+        curr_train_smape = 0.0
+        curr_train_rmse = 0.0
+        for batch, (X_batch, y_batch) in enumerate(tqdm(train_loader, desc=f'(Train) Epoch {epoch + 1} of {epochs}')):
             X_batch, y_batch = X_batch.to(settings.device), y_batch.to(settings.device)
             optimizer.zero_grad()
 
             y_pred = model(X_batch)
             loss = mae_loss(y_pred, y_batch)
-            mape = mape_loss(y_pred, y_batch)
+            smape = smape_loss(y_pred, y_batch)
             rmse = rmse_loss(y_pred, y_batch)
 
             loss.backward()
@@ -56,40 +58,62 @@ def train(model, X_train, y_train, batch_size, learning_rate, epochs, save_path=
 
             optimizer.step()
 
-            curr_loss += loss.item()
-            curr_mape += mape.item()
-            curr_rmse += rmse.item()
+            curr_train_loss += loss.item()
+            curr_train_smape += smape.item()
+            curr_train_rmse += rmse.item()
 
-        epoch_avg_loss = curr_loss / len(train_loader)
-        epoch_avg_mape = curr_mape / len(train_loader)
-        epoch_avg_rmse = curr_rmse / len(train_loader)
-        print(f"- MAE = {epoch_avg_loss:>.3f}, MAPE = {epoch_avg_mape:>.3f}, RMSE = {epoch_avg_rmse:>.3f}")
-        losses.append(epoch_avg_loss)
+        epoch_avg_train_loss = curr_train_loss / len(train_loader)
+        epoch_avg_train_smape = curr_train_smape / len(train_loader)
+        epoch_avg_train_rmse = curr_train_rmse / len(train_loader)
 
-        if epoch_avg_loss < best_loss:
-            best_loss = epoch_avg_loss
-            best_mape = epoch_avg_mape
-            best_rmse = epoch_avg_rmse
+
+        print(f"- Losses: MAE = {epoch_avg_train_loss:>.3f}, SMAPE = {100 * epoch_avg_train_smape:>.2f}%, RMSE = {epoch_avg_train_rmse:>.3f}")
+
+        # Validation step
+        curr_val_loss = 0.0
+        curr_val_smape = 0.0
+        curr_val_rmse = 0.0
+        for batch, (X_batch, y_batch) in enumerate(tqdm(val_loader, desc=f'(Val) Epoch {epoch + 1} of {epochs}')):
+            X_batch, y_batch = X_batch.to(settings.device), y_batch.to(settings.device)
+
+            y_pred = model(X_batch)
+            curr_val_loss += mae_loss(y_pred, y_batch).item()
+            curr_val_smape += smape_loss(y_pred, y_batch).item()
+            curr_val_rmse += rmse_loss(y_pred, y_batch).item()
+
+        epoch_avg_val_loss = curr_val_loss / len(val_loader)
+        epoch_avg_val_smape = curr_val_smape / len(val_loader)
+        epoch_avg_val_rmse = curr_val_rmse / len(val_loader)
+
+        print(f"- Losses: MAE = {epoch_avg_val_loss:>.3f}, SMAPE = {100 * epoch_avg_val_smape:>.2f}%, RMSE = {epoch_avg_val_rmse:>.3f}")
+
+        losses.append(epoch_avg_val_loss)
+
+        if epoch_avg_val_loss < best_val_loss:
+            best_val_loss = epoch_avg_val_loss
+            best_val_smape = epoch_avg_val_smape
+            best_val_rmse = epoch_avg_val_rmse
             if save_path is not None:
                 save_model(model, save_path)
 
-    print(f'End of training\n- MAE = {best_loss:>.3f}, MAPE = {best_mape:>.3f}, RMSE = {best_rmse:>.3f}')
+
+    print(f'End of training\nVal losses: MAE = {best_val_loss:>.3f}, SMAPE = {100 * best_val_smape:>.3f}%, RMSE = {best_val_rmse:>.3f}')
     plot_loss_history(model, losses)
-    return [best_loss, best_mape, best_rmse]
+    return [best_val_loss, best_val_smape, best_val_rmse]
 
 
 def test(model, X_test, y_test, batch_size):
     dataset = RegressionDataset(X_test, y_test)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, generator=torch.Generator(device=settings.device))
+    dataloader = DataLoader(dataset, batch_size=batch_size, generator=torch.Generator(device=settings.device))
     loss_fn = nn.L1Loss().to(settings.device)
-    mape = MeanAbsolutePercentageError().to(settings.device)
+    smape = SymmetricMeanAbsolutePercentageError().to(settings.device)
     mse = nn.MSELoss().to(settings.device)
 
     def rmse(x, y):
         return torch.sqrt(mse(x, y))
 
     total_loss = 0.0
-    total_mape = 0.0
+    total_smape = 0.0
     total_rmse = 0.0
     print('Begin testing')
     model.eval()
@@ -99,14 +123,14 @@ def test(model, X_test, y_test, batch_size):
             y_pred = model(X_batch)
             loss = loss_fn(y_pred, y_batch)
             total_loss += loss.item()
-            total_mape += mape(y_pred, y_batch).item()
+            total_smape += smape(y_pred, y_batch).item()
             total_rmse += rmse(y_pred, y_batch).item()
 
     total_loss /= len(dataloader)
-    total_mape /= len(dataloader)
+    total_smape /= len(dataloader)
     total_rmse /= len(dataloader)
-    print(f"End of testing\n- MAE = {total_loss:>.3f}, MAPE = {total_mape:>.3f}, RMSE = {total_rmse:>.3f}")
-    return [total_loss, total_mape, total_rmse]
+    print(f"End of testing\n- MAE = {total_loss:>.3f}, SMAPE = {100 * total_smape:>.3f}%, RMSE = {total_rmse:>.3f}")
+    return [total_loss, total_smape, total_rmse]
 
 
 def save_model(model, path):

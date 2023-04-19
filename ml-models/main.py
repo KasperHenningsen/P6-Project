@@ -26,7 +26,8 @@ if __name__ == '__main__':
     batch_size = 8
     epochs = 15
     learning_rate = 1e-4
-    train_size = 0.7
+    train_size = 0.6
+    val_size = 0.2
     grad_clipping = None
     cnn = ConvolutionalNet(input_channels=32, hidden_size=12, kernel_size=12, dropout_prob=0)
     mlp = MultiLayerPerceptronNet(input_size=32, hidden_size=256, output_size=1, num_layers=1, seq_length=seq_length)
@@ -38,6 +39,8 @@ if __name__ == '__main__':
     transformer = TransformerModel(input_size=32, d_model=128, nhead=4, num_layers=6, output_size=12, dropout=0.1)
 
     train_model = cnn
+    print(f'Model: {train_model.get_name()}')
+
     set_next_save_path(train_model)
 
     os.makedirs(settings.models_path, exist_ok=True)
@@ -49,14 +52,19 @@ if __name__ == '__main__':
     # Generate RBF plot
     #plot_rbf_small(df)
 
-    train_df, test_df = train_test_split(df, train_size=train_size, shuffle=False)
+    train_val_df, test_df = train_test_split(df, train_size=train_size + val_size, shuffle=False)
+
+    # Split train into train + val
+    train_df, val_df = train_test_split(train_val_df, test_size=(val_size / (train_size + val_size)), shuffle=False)
 
     # Train
     print("\n========== Training ==========")
     train_losses = [None, None, None]
     X_train, y_train = prepare_X_and_y(train_df, n_steps_in=seq_length, n_steps_out=target_length, target_column=target_col)
+    X_val, y_val = prepare_X_and_y(val_df, n_steps_in=seq_length, n_steps_out=target_length, target_column=target_col)
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
+    X_val = scaler.transform(X_val.reshape(-1, X_val.shape[-1])).reshape(X_val.shape)
 
     # Save scaler for later use
     joblib.dump(scaler, os.path.join(settings.models_path, 'scaler.gz'))
@@ -64,11 +72,12 @@ if __name__ == '__main__':
     train_start_time = time.time()
     total_train_time = None
     try:
-        train_losses = train(train_model, X_train, y_train, batch_size, learning_rate, epochs, grad_clipping=grad_clipping, save_path=train_model.path)
+        train_losses = train(train_model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epochs, grad_clipping=grad_clipping, save_path=train_model.path)
         total_train_time = time.time() - train_start_time
     except KeyboardInterrupt:
         print("Exiting early from training")
-        train_model.load_saved_model()
+
+    train_model.load_saved_model()
 
     # Test
     print("\n========== Testing ==========")
