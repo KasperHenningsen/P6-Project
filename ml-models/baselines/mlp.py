@@ -6,9 +6,9 @@ from torch import nn
 import settings
 
 
-class MLP(nn.Module):
+class MultiLayerPerceptronNetwork(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, num_layers=2, seq_length=12):
-        super().__init__()
+        super(MultiLayerPerceptronNetwork, self).__init__()
         self.path = path.join(settings.models_path, self.get_name())
         self.input_size = input_size
         self.hidden_size = hidden_size

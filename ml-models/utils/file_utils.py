@@ -6,11 +6,11 @@ from torch.nn import RNN
 import settings
 from glob import glob
 import json
-from baselines.cnn import Convolution1D
-from baselines.gru import GRUNet
-from baselines.lstm import LSTM
-from baselines.mlp import MLP
-from baselines.rnn import RNNNet
+from baselines.cnn import ConvolutionalNeuralNetwork
+from baselines.gru import GatedRecurrentUnitNetwork
+from baselines.lstm import LongShortTermMemoryNetwork
+from baselines.mlp import MultiLayerPerceptronNetwork
+from baselines.rnn import RecurrentNeuralNetwork
 from baselines.tcn import TemporalConvolutionNetwork
 from baselines.transformer import TransformerModel
 from mtgnn.mtgnn import MTGNN
@@ -63,14 +63,14 @@ def generate_train_test_log(model, train_losses, test_losses, seq_len, target_le
 
 
 def get_model_params(model) -> object:
-    if model.get_name() == Convolution1D.get_name():
+    if model.get_name() == ConvolutionalNeuralNetwork.get_name():
         return {
             'input_channels': model.input_channels,
             'hidden_size': model.hidden_size,
             'kernel_size': model.kernel_size,
             'dropout': model.dropout_prob
         }
-    elif model.get_name() == LSTM.get_name():
+    elif model.get_name() == LongShortTermMemoryNetwork.get_name():
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -78,7 +78,7 @@ def get_model_params(model) -> object:
             'num_layers': model.num_layers,
             'dropout': model.dropout
         }
-    elif model.get_name() == RNNNet.get_name():
+    elif model.get_name() == RecurrentNeuralNetwork.get_name():
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -87,7 +87,7 @@ def get_model_params(model) -> object:
             'dropout': model.dropout,
             'nonlinearity': model.nonlinearity
         }
-    elif model.get_name() == MLP.get_name():
+    elif model.get_name() == MultiLayerPerceptronNetwork.get_name():
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -103,7 +103,7 @@ def get_model_params(model) -> object:
             'kernel_size': model.kernel_size,
             'dilation_base': model.dilation_base
         }
-    elif model.get_name() == GRUNet.get_name():
+    elif model.get_name() == GatedRecurrentUnitNetwork.get_name():
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,

@@ -6,11 +6,11 @@ from sklearn.preprocessing import StandardScaler
 import os
 
 import settings
-from baselines.cnn import Convolution1D
-from baselines.gru import GRUNet
-from baselines.mlp import MLP
-from baselines.rnn import RNNNet
-from baselines.lstm import LSTM
+from baselines.cnn import ConvolutionalNeuralNetwork
+from baselines.gru import GatedRecurrentUnitNetwork
+from baselines.mlp import MultiLayerPerceptronNetwork
+from baselines.rnn import RecurrentNeuralNetwork
+from baselines.lstm import LongShortTermMemoryNetwork
 from baselines.tcn import TemporalConvolutionNetwork
 from baselines.transformer import TransformerModel
 from mtgnn.mtgnn import MTGNN
@@ -28,11 +28,11 @@ if __name__ == '__main__':
     learning_rate = 1e-4
     train_size = 0.7
     grad_clipping = None
-    cnn = Convolution1D(input_channels=32, hidden_size=12, kernel_size=12, dropout_prob=0)
-    mlp = MLP(input_size=32, hidden_size=256, output_size=1, num_layers=1, seq_length=seq_length)
-    gru = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
-    rnn = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3)
-    lstm = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    cnn = ConvolutionalNeuralNetwork(input_channels=32, hidden_size=12, kernel_size=12, dropout_prob=0)
+    mlp = MultiLayerPerceptronNetwork(input_size=32, hidden_size=256, output_size=1, num_layers=1, seq_length=seq_length)
+    gru = GatedRecurrentUnitNetwork(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    rnn = RecurrentNeuralNetwork(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3)
+    lstm = LongShortTermMemoryNetwork(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
     tcn = TemporalConvolutionNetwork(input_size=32, output_size=1, hidden_size=12)
     mtgnn = MTGNN(num_features=32, seq_length=seq_length, use_output_convolution=False, dropout=0.3)
     transformer = TransformerModel(input_size=32, d_model=128, nhead=4, num_layers=6, output_size=12, dropout=0.1)
