@@ -69,9 +69,11 @@ def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epoc
         print(f"- Losses: MAE = {epoch_avg_train_loss:>.3f}, SMAPE = {100 * epoch_avg_train_smape:>.2f}%, RMSE = {epoch_avg_train_rmse:>.3f}")
 
         # Validation step
+        model.eval()
         curr_val_loss = 0.0
         curr_val_smape = 0.0
         curr_val_rmse = 0.0
+
         with torch.no_grad():
             for batch, (X_batch, y_batch) in enumerate(tqdm(val_loader, desc=f'(Val) Epoch {epoch + 1} of {epochs}')):
                 X_batch, y_batch = X_batch.to(settings.device), y_batch.to(settings.device)
