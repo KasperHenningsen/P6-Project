@@ -66,20 +66,20 @@ def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epoc
         epoch_avg_train_smape = curr_train_smape / len(train_loader)
         epoch_avg_train_rmse = curr_train_rmse / len(train_loader)
 
-
         print(f"- Losses: MAE = {epoch_avg_train_loss:>.3f}, SMAPE = {100 * epoch_avg_train_smape:>.2f}%, RMSE = {epoch_avg_train_rmse:>.3f}")
 
         # Validation step
         curr_val_loss = 0.0
         curr_val_smape = 0.0
         curr_val_rmse = 0.0
-        for batch, (X_batch, y_batch) in enumerate(tqdm(val_loader, desc=f'(Val) Epoch {epoch + 1} of {epochs}')):
-            X_batch, y_batch = X_batch.to(settings.device), y_batch.to(settings.device)
+        with torch.no_grad():
+            for batch, (X_batch, y_batch) in enumerate(tqdm(val_loader, desc=f'(Val) Epoch {epoch + 1} of {epochs}')):
+                X_batch, y_batch = X_batch.to(settings.device), y_batch.to(settings.device)
 
-            y_pred = model(X_batch)
-            curr_val_loss += mae_loss(y_pred, y_batch).item()
-            curr_val_smape += smape_loss(y_pred, y_batch).item()
-            curr_val_rmse += rmse_loss(y_pred, y_batch).item()
+                y_pred = model(X_batch)
+                curr_val_loss += mae_loss(y_pred, y_batch).item()
+                curr_val_smape += smape_loss(y_pred, y_batch).item()
+                curr_val_rmse += rmse_loss(y_pred, y_batch).item()
 
         epoch_avg_val_loss = curr_val_loss / len(val_loader)
         epoch_avg_val_smape = curr_val_smape / len(val_loader)
