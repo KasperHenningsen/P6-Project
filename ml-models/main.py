@@ -6,13 +6,14 @@ from sklearn.preprocessing import StandardScaler
 import os
 
 import settings
-from baselines.cnn import Convolution1D
-from baselines.gru import GRUNet
-from baselines.rnn import RNNNet
-from baselines.lstm import LSTM
-from baselines.tcn import TemporalConvolutionNetwork
+from baselines.cnn import ConvolutionalNet
+from baselines.gru import GatedRecurrentUnitNet
+from baselines.mlp import MultiLayerPerceptronNet
+from baselines.rnn import RecurrentNeuralNet
+from baselines.lstm import LongShortTermMemoryNet
+from baselines.tcn import TemporalConvolutionNet
 from baselines.transformer import TransformerModel
-from mtgnn.mtgnn import MTGNN
+from mtgnn.mtgnn import MultiTaskGraphNeuralNet
 from training import train, test
 from utils.plotting import plot
 from utils.data_utils import get_processed_data, prepare_X_and_y
@@ -27,15 +28,16 @@ if __name__ == '__main__':
     learning_rate = 1e-4
     train_size = 0.7
     grad_clipping = None
-    cnn = Convolution1D(input_channels=32, hidden_size=12, kernel_size=12, dropout_prob=0)
-    gru = GRUNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
-    rnn = RNNNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3)
-    lstm = LSTM(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
-    tcn = TemporalConvolutionNetwork(input_size=32, output_size=1, hidden_size=12)
-    mtgnn = MTGNN(num_features=32, seq_length=seq_length, use_output_convolution=False, dropout=0.3)
+    cnn = ConvolutionalNet(input_channels=32, hidden_size=12, kernel_size=12, dropout_prob=0)
+    mlp = MultiLayerPerceptronNet(input_size=32, hidden_size=256, output_size=1, num_layers=1, seq_length=seq_length)
+    gru = GatedRecurrentUnitNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    rnn = RecurrentNeuralNet(input_size=32, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3)
+    lstm = LongShortTermMemoryNet(input_size=32, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
+    tcn = TemporalConvolutionNet(input_size=32, output_size=1, hidden_size=12)
+    mtgnn = MultiTaskGraphNeuralNet(num_features=32, seq_length=seq_length, use_output_convolution=False, dropout=0.3)
     transformer = TransformerModel(input_size=32, d_model=128, nhead=4, num_layers=6, output_size=12, dropout=0.1)
 
-    train_model = rnn
+    train_model = cnn
     set_next_save_path(train_model)
 
     os.makedirs(settings.models_path, exist_ok=True)

@@ -7,9 +7,9 @@ from torch.nn.utils import weight_norm
 import settings
 
 
-class TemporalConvolutionNetwork(nn.Module):
+class TemporalConvolutionNet(nn.Module):
     def __init__(self, input_size, output_size, hidden_size=12, depth=4, kernel_size=3, dilation_base=2):
-        super(TemporalConvolutionNetwork, self).__init__()
+        super(TemporalConvolutionNet, self).__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
         self.input_size = input_size
         self.output_size = output_size

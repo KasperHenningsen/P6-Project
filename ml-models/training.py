@@ -15,7 +15,7 @@ from utils.plotting import plot_loss_history
 
 def train(model, X_train, y_train, batch_size, learning_rate, epochs, save_path=None, grad_clipping=None):
     train_dataset = RegressionDataset(X_train, y_train)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=torch.Generator(device=settings.device))
 
     # Define training parameters
     mae_loss = nn.L1Loss().to(settings.device)
@@ -80,7 +80,7 @@ def train(model, X_train, y_train, batch_size, learning_rate, epochs, save_path=
 
 def test(model, X_test, y_test, batch_size):
     dataset = RegressionDataset(X_test, y_test)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, generator=torch.Generator(device=settings.device))
     loss_fn = nn.L1Loss().to(settings.device)
     mape = MeanAbsolutePercentageError().to(settings.device)
     mse = nn.MSELoss().to(settings.device)
@@ -102,7 +102,10 @@ def test(model, X_test, y_test, batch_size):
             total_mape += mape(y_pred, y_batch).item()
             total_rmse += rmse(y_pred, y_batch).item()
 
-    print(f"End of testing\n- MAE = {(total_loss/len(dataloader)):>.3f}, MAPE = {(total_mape/len(dataloader)):>.3f}, RMSE = {(total_rmse/len(dataloader)):>.3f}")
+    total_loss /= len(dataloader)
+    total_mape /= len(dataloader)
+    total_rmse /= len(dataloader)
+    print(f"End of testing\n- MAE = {total_loss:>.3f}, MAPE = {total_mape:>.3f}, RMSE = {total_rmse:>.3f}")
     return [total_loss, total_mape, total_rmse]
 
 
