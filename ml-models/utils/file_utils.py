@@ -6,14 +6,14 @@ from torch.nn import RNN
 import settings
 from glob import glob
 import json
-from baselines.cnn import ConvolutionalNeuralNetwork
-from baselines.gru import GatedRecurrentUnitNetwork
-from baselines.lstm import LongShortTermMemoryNetwork
-from baselines.mlp import MultiLayerPerceptronNetwork
-from baselines.rnn import RecurrentNeuralNetwork
-from baselines.tcn import TemporalConvolutionNetwork
+from baselines.cnn import ConvolutionalNet
+from baselines.gru import GatedRecurrentUnitNet
+from baselines.lstm import LongShortTermMemoryNet
+from baselines.mlp import MultiLayerPerceptronNet
+from baselines.rnn import RecurrentNeuralNet
+from baselines.tcn import TemporalConvolutionNet
 from baselines.transformer import TransformerModel
-from mtgnn.mtgnn import MTGNN
+from mtgnn.mtgnn import MultiTaskGraphNeuralNet
 
 
 def set_next_save_path(model):
@@ -63,14 +63,14 @@ def generate_train_test_log(model, train_losses, test_losses, seq_len, target_le
 
 
 def get_model_params(model) -> object:
-    if model.get_name() == ConvolutionalNeuralNetwork.get_name():
+    if isinstance(model, ConvolutionalNet):
         return {
             'input_channels': model.input_channels,
             'hidden_size': model.hidden_size,
             'kernel_size': model.kernel_size,
             'dropout': model.dropout_prob
         }
-    elif model.get_name() == LongShortTermMemoryNetwork.get_name():
+    elif isinstance(model, LongShortTermMemoryNet):
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -78,7 +78,7 @@ def get_model_params(model) -> object:
             'num_layers': model.num_layers,
             'dropout': model.dropout
         }
-    elif model.get_name() == RecurrentNeuralNetwork.get_name():
+    elif isinstance(model, RecurrentNeuralNet):
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -87,14 +87,14 @@ def get_model_params(model) -> object:
             'dropout': model.dropout,
             'nonlinearity': model.nonlinearity
         }
-    elif model.get_name() == MultiLayerPerceptronNetwork.get_name():
+    elif isinstance(model, MultiLayerPerceptronNet):
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
             'num_layers': model.num_layers,
             'output_size': model.output_size
         }
-    elif model.get_name() == TemporalConvolutionNetwork.get_name():
+    elif isinstance(model, TemporalConvolutionNet):
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -103,7 +103,7 @@ def get_model_params(model) -> object:
             'kernel_size': model.kernel_size,
             'dilation_base': model.dilation_base
         }
-    elif model.get_name() == GatedRecurrentUnitNetwork.get_name():
+    elif isinstance(model, GatedRecurrentUnitNet):
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -111,7 +111,7 @@ def get_model_params(model) -> object:
             'num_layers': model.num_layers,
             'dropout': model.dropout
         }
-    elif model.get_name() == TransformerModel.get_name():
+    elif isinstance(model, TransformerModel):
         return {
             'input_size': model.input_size,
             'output_size': model.output_size,
@@ -121,7 +121,7 @@ def get_model_params(model) -> object:
             'dim_feedforward': model.dim_feedforward,
             'dropout': model.dropout
         }
-    elif model.get_name() == MTGNN.get_name():
+    elif isinstance(model, MultiTaskGraphNeuralNet):
         return {
             'seq_length': model.seq_length,
             'num_features': model.num_features,

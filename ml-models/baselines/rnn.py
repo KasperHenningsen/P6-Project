@@ -5,9 +5,9 @@ import settings
 from torch import nn
 
 
-class RecurrentNeuralNetwork(nn.Module):
+class RecurrentNeuralNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, num_layers=1, dropout_prob=0, nonlinearity='tanh'):
-        super(RecurrentNeuralNetwork, self).__init__()
+        super(RecurrentNeuralNet, self).__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
         self.num_layers = num_layers
         self.hidden_size = hidden_size
