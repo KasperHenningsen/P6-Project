@@ -5,7 +5,7 @@ import torch
 from torch import nn
 
 
-class LongShortTermMemoryNet(nn.Module):
+class LSTM(nn.Module):
     def __init__(self, input_size, hidden_size, output_size=1, dropout_prob=0.2, num_layers=2):
         super().__init__()
         self.path = os.path.join(settings.models_path, self.get_name())

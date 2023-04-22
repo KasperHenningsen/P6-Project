@@ -13,7 +13,7 @@ from utils.datasets import RegressionDataset
 from utils.plotting import plot_loss_history
 
 
-def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epochs, save_path=None, grad_clipping=None):
+def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epochs, y_scaler, save_path=None, grad_clipping=None):
     train_dataset = RegressionDataset(X_train, y_train)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=torch.Generator(device=settings.device))
     val_dataset = RegressionDataset(X_val, y_val)
@@ -23,6 +23,9 @@ def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epoc
     mae_loss = nn.L1Loss().to(settings.device)
     smape_loss = SymmetricMeanAbsolutePercentageError().to(settings.device)
     mse_loss = nn.MSELoss().to(settings.device)
+
+    y_mean = torch.from_numpy(y_scaler.mean_).to(settings.device)
+    y_scale = torch.from_numpy(y_scaler.scale_).to(settings.device)
 
     def rmse_loss(x, y):
         return torch.sqrt(mse_loss(x, y)).to(settings.device)
@@ -45,7 +48,8 @@ def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epoc
             X_batch, y_batch = X_batch.to(settings.device), y_batch.to(settings.device)
             optimizer.zero_grad()
 
-            y_pred = model(X_batch)
+            y_pred = model(X_batch) * y_scale + y_mean
+
             loss = mae_loss(y_pred, y_batch)
             smape = smape_loss(y_pred, y_batch)
             rmse = rmse_loss(y_pred, y_batch)
@@ -78,7 +82,8 @@ def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epoc
             for batch, (X_batch, y_batch) in enumerate(tqdm(val_loader, desc=f'(Val) Epoch {epoch + 1} of {epochs}')):
                 X_batch, y_batch = X_batch.to(settings.device), y_batch.to(settings.device)
 
-                y_pred = model(X_batch)
+                y_pred = model(X_batch) * y_scale + y_mean
+
                 curr_val_loss += mae_loss(y_pred, y_batch).item()
                 curr_val_smape += smape_loss(y_pred, y_batch).item()
                 curr_val_rmse += rmse_loss(y_pred, y_batch).item()
@@ -87,7 +92,7 @@ def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epoc
         epoch_avg_val_smape = curr_val_smape / len(val_loader)
         epoch_avg_val_rmse = curr_val_rmse / len(val_loader)
 
-        print(f"- Losses: MAE = {epoch_avg_val_loss:>.3f}, SMAPE = {100 * epoch_avg_val_smape:>.2f}%, RMSE = {epoch_avg_val_rmse:>.3f}")
+        print(f"- Validation losses: MAE = {epoch_avg_val_loss:>.3f}, SMAPE = {100 * epoch_avg_val_smape:>.2f}%, RMSE = {epoch_avg_val_rmse:>.3f}")
 
         losses.append(epoch_avg_val_loss)
 
@@ -104,12 +109,15 @@ def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epoc
     return [best_val_loss, best_val_smape, best_val_rmse]
 
 
-def test(model, X_test, y_test, batch_size):
+def test(model, X_test, y_test, batch_size, y_scaler):
     dataset = RegressionDataset(X_test, y_test)
     dataloader = DataLoader(dataset, batch_size=batch_size, generator=torch.Generator(device=settings.device))
     loss_fn = nn.L1Loss().to(settings.device)
     smape = SymmetricMeanAbsolutePercentageError().to(settings.device)
     mse = nn.MSELoss().to(settings.device)
+
+    y_mean = torch.from_numpy(y_scaler.mean_).to(settings.device)
+    y_scale = torch.from_numpy(y_scaler.scale_).to(settings.device)
 
     def rmse(x, y):
         return torch.sqrt(mse(x, y))
@@ -122,7 +130,9 @@ def test(model, X_test, y_test, batch_size):
     with torch.no_grad():
         for batch, (X_batch, y_batch) in enumerate(tqdm(dataloader, desc=f'Testing')):
             X_batch, y_batch = X_batch.to(settings.device), y_batch.to(settings.device)
-            y_pred = model(X_batch)
+
+            y_pred = model(X_batch) * y_scale + y_mean
+
             loss = loss_fn(y_pred, y_batch)
             total_loss += loss.item()
             total_smape += smape(y_pred, y_batch).item()

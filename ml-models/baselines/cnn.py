@@ -5,9 +5,9 @@ import torch
 from torch import nn
 
 
-class ConvolutionalNet(nn.Module):
+class CNN(nn.Module):
     def __init__(self, input_channels, hidden_size, kernel_size, dropout_prob=0.2):
-        super(ConvolutionalNet, self).__init__()
+        super(CNN, self).__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
         self.input_channels = input_channels
         self.hidden_size = hidden_size

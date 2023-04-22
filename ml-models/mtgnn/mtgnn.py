@@ -8,7 +8,7 @@ import settings
 from .layers import GraphLearningLayer, MixHopPropagationLayer, DilatedInceptionLayer, LayerNormalization
 
 
-class MultiTaskGraphNeuralNet(nn.Module):
+class MTGNN(nn.Module):
     def __init__(self,
                  num_features,
                  seq_length,
@@ -27,7 +27,7 @@ class MultiTaskGraphNeuralNet(nn.Module):
                  dilation_exponential=2,
                  use_output_convolution=True
                  ):
-        super(MultiTaskGraphNeuralNet, self).__init__()
+        super(MTGNN, self).__init__()
         input_size = 1  # in the MTGNN our time-series data is always 1-dimensional (each feature at time-step i is just a single value)
         self.path = os.path.join(settings.models_path, self.get_name())
         self.seq_length = seq_length

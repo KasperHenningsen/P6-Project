@@ -5,9 +5,9 @@ import settings
 from torch import nn
 
 
-class RecurrentNeuralNet(nn.Module):
+class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, num_layers=1, dropout_prob=0, nonlinearity='tanh'):
-        super(RecurrentNeuralNet, self).__init__()
+        super(RNN, self).__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
         self.num_layers = num_layers
         self.hidden_size = hidden_size
@@ -27,7 +27,7 @@ class RecurrentNeuralNet(nn.Module):
         h0 = self.init_internal_states()
         out, hn = self.rnn(x, h0.detach())
         out = self.linear(out)
-        return out.reshape(-1, 12)
+        return torch.squeeze(out)
 
     def init_internal_states(self):
         h0 = torch.zeros(1 * self.num_layers, self.batch_size, self.hidden_size, dtype=torch.float64).to(settings.device)

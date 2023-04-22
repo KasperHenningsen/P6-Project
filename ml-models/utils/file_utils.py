@@ -6,24 +6,32 @@ from torch.nn import RNN
 import settings
 from glob import glob
 import json
-from baselines.cnn import ConvolutionalNet
-from baselines.gru import GatedRecurrentUnitNet
-from baselines.lstm import LongShortTermMemoryNet
-from baselines.mlp import MultiLayerPerceptronNet
-from baselines.rnn import RecurrentNeuralNet
-from baselines.tcn import TemporalConvolutionNet
-from baselines.transformer import TransformerModel
-from mtgnn.mtgnn import MultiTaskGraphNeuralNet
+from baselines.cnn import CNN
+from baselines.gru import GRU
+from baselines.lstm import LSTM
+from baselines.mlp import MLP
+from baselines.rnn import RNN
+from baselines.tcn import TCN
+from baselines.transformer import Transformer
+from mtgnn.mtgnn import MTGNN
+
+
+def get_latest_run_no(base_path):
+    folders = glob(base_path + '/run_*', recursive=False)
+    run_numbers = [int(x.split('\\')[-1].split('_')[-1]) for x in folders]
+    return max(run_numbers, default=-1)
 
 
 def set_next_save_path(model):
-    base_path = path.join(settings.models_path, model.get_name())
-    folders = glob(path.join(base_path, '*/'), recursive=False)
-    if len(folders) == 0:
-        model.path = path.join(base_path, "run_0")
-    else:
-        latest_folder = folders[-1]
-        run_no = int(latest_folder.split('\\')[-2].split('_')[-1]) + 1
+    base_path = path.join(settings.models_path, model.get_name(), 'runs')
+    latest_run_no = get_latest_run_no(base_path)
+    model.path = path.join(base_path, f'run_{latest_run_no+1}')
+
+
+def set_load_path(model):
+    if not path.exists(model.path):
+        base_path = path.join(settings.models_path, model.get_name(), 'runs')
+        run_no = get_latest_run_no(base_path)
         model.path = path.join(base_path, f'run_{run_no}')
 
 
@@ -35,14 +43,14 @@ def generate_train_test_log(model, train_losses, test_losses, seq_len, target_le
         'trained_at': datetime.datetime.now().isoformat(),
         'train_time_seconds': train_time,
         'loss': {
-            'train': {
+            'validation': {
                 'mae': train_losses[0],
-                'mape': train_losses[1],
+                'smape': train_losses[1],
                 'rmse': train_losses[2]
             },
             'test': {
                 'mae': test_losses[0],
-                'mape': test_losses[1],
+                'smape': test_losses[1],
                 'rmse': test_losses[2]
             }
         },
@@ -63,14 +71,14 @@ def generate_train_test_log(model, train_losses, test_losses, seq_len, target_le
 
 
 def get_model_params(model) -> object:
-    if isinstance(model, ConvolutionalNet):
+    if isinstance(model, CNN):
         return {
             'input_channels': model.input_channels,
             'hidden_size': model.hidden_size,
             'kernel_size': model.kernel_size,
             'dropout': model.dropout_prob
         }
-    elif isinstance(model, LongShortTermMemoryNet):
+    elif isinstance(model, LSTM):
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -78,7 +86,7 @@ def get_model_params(model) -> object:
             'num_layers': model.num_layers,
             'dropout': model.dropout
         }
-    elif isinstance(model, RecurrentNeuralNet):
+    elif isinstance(model, RNN):
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -87,14 +95,14 @@ def get_model_params(model) -> object:
             'dropout': model.dropout,
             'nonlinearity': model.nonlinearity
         }
-    elif isinstance(model, MultiLayerPerceptronNet):
+    elif isinstance(model, MLP):
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
             'num_layers': model.num_layers,
             'output_size': model.output_size
         }
-    elif isinstance(model, TemporalConvolutionNet):
+    elif isinstance(model, TCN):
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -103,7 +111,7 @@ def get_model_params(model) -> object:
             'kernel_size': model.kernel_size,
             'dilation_base': model.dilation_base
         }
-    elif isinstance(model, GatedRecurrentUnitNet):
+    elif isinstance(model, GRU):
         return {
             'input_size': model.input_size,
             'hidden_size': model.hidden_size,
@@ -111,7 +119,7 @@ def get_model_params(model) -> object:
             'num_layers': model.num_layers,
             'dropout': model.dropout
         }
-    elif isinstance(model, TransformerModel):
+    elif isinstance(model, Transformer):
         return {
             'input_size': model.input_size,
             'output_size': model.output_size,
@@ -121,7 +129,7 @@ def get_model_params(model) -> object:
             'dim_feedforward': model.dim_feedforward,
             'dropout': model.dropout
         }
-    elif isinstance(model, MultiTaskGraphNeuralNet):
+    elif isinstance(model, MTGNN):
         return {
             'seq_length': model.seq_length,
             'num_features': model.num_features,
