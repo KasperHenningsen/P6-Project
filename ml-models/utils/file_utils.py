@@ -17,8 +17,8 @@ from mtgnn.mtgnn import MTGNN
 
 
 def get_latest_run_no(base_path):
-    folders = glob(base_path + '/*/', recursive=False)
-    run_numbers = [int(x.split('\\')[-2].split('_')[-1]) for x in folders]
+    folders = glob(base_path + '/run_*', recursive=False)
+    run_numbers = [int(x.split('\\')[-1].split('_')[-1]) for x in folders]
     return max(run_numbers, default=-1)
 
 
