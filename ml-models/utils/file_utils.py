@@ -13,17 +13,25 @@ from baselines.mlp import MLP
 from baselines.rnn import RNN
 from baselines.tcn import TCN
 from baselines.transformer import Transformer
-from mtgnn.mtgnn import MultiTaskGraphNeuralNet
+from mtgnn.mtgnn import MTGNN
+
+
+def get_latest_run_no(base_path):
+    folders = glob(base_path + '/*/', recursive=False)
+    run_numbers = [int(x.split('\\')[-2].split('_')[-1]) for x in folders]
+    return max(run_numbers, default=-1)
 
 
 def set_next_save_path(model):
-    base_path = path.join(settings.models_path, model.get_name())
-    folders = glob(path.join(base_path, '*/'), recursive=False)
-    if len(folders) == 0:
-        model.path = path.join(base_path, "run_0")
-    else:
-        latest_folder = folders[-1]
-        run_no = int(latest_folder.split('\\')[-2].split('_')[-1]) + 1
+    base_path = path.join(settings.models_path, model.get_name(), 'runs')
+    latest_run_no = get_latest_run_no(base_path)
+    model.path = path.join(base_path, f'run_{latest_run_no+1}')
+
+
+def set_load_path(model):
+    if not path.exists(model.path):
+        base_path = path.join(settings.models_path, model.get_name(), 'runs')
+        run_no = get_latest_run_no(base_path)
         model.path = path.join(base_path, f'run_{run_no}')
 
 
@@ -121,7 +129,7 @@ def get_model_params(model) -> object:
             'dim_feedforward': model.dim_feedforward,
             'dropout': model.dropout
         }
-    elif isinstance(model, MultiTaskGraphNeuralNet):
+    elif isinstance(model, MTGNN):
         return {
             'seq_length': model.seq_length,
             'num_features': model.num_features,
