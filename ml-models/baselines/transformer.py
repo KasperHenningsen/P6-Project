@@ -45,7 +45,7 @@ class TransformerEncoder(nn.Module):
         return src
 
 
-class TransformerModel(nn.Module):
+class Transformer(nn.Module):
     def __init__(self, input_size, d_model, nhead, num_layers, output_size, dim_feedforward=2048, dropout=0.1):
         super().__init__()
         self.path = os.path.join(settings.models_path, self.get_name())

@@ -1,0 +1,41 @@
+{
+  "model": "MultiTaskGraphNeuralNet",
+  "trained_at": "2023-04-21T07:20:27.174514",
+  "train_time_seconds": 28252,
+  "loss": {
+    "validation": {
+      "mae": 1.0520730569000558,
+      "mape": 0.23535126332083772,
+      "rmse": 1.2628087260989171
+    },
+    "test": {
+      "mae": 1.095030340071484,
+      "mape": 0.21690623835845887,
+      "rmse": 1.418251492695537
+    }
+  },
+  "hyperparameters": {
+    "seq_len": 12,
+    "target_len": 12,
+    "target_col": "temp",
+    "batch_size": 4,
+    "epochs": 20,
+    "learning_rate": 0.0001,
+    "train_size": 0.6,
+    "grad_clipping": 5
+  },
+  "model_parameters": {
+    "seq_length": 12,
+    "num_features": 32,
+    "num_layers": 3,
+    "dropout": 0.3,
+    "use_output_convolution": false,
+    "build_adj_matrix": true,
+    "conv_channels": 32,
+    "residual_channels": 16,
+    "skip_channels": 64,
+    "end_channels": 128,
+    "tan_alpha": 3,
+    "prop_alpha": 0.05
+  }
+}

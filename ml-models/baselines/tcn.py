@@ -7,9 +7,9 @@ from torch.nn.utils import weight_norm
 import settings
 
 
-class TemporalConvolutionNet(nn.Module):
-    def __init__(self, input_size, output_size, hidden_size=12, depth=4, kernel_size=3, dilation_base=2):
-        super(TemporalConvolutionNet, self).__init__()
+class TCN(nn.Module):
+    def __init__(self, input_size, output_size, hidden_size=12, depth=4, kernel_size=3, dilation_base=2, dropout=0.2):
+        super(TCN, self).__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
         self.input_size = input_size
         self.output_size = output_size
@@ -19,18 +19,18 @@ class TemporalConvolutionNet(nn.Module):
         self.dilation_base = dilation_base
 
         self.residual_blocks = nn.Sequential(
-            ResidualBlock(input_size, hidden_size, dilation=1, kernel_size=kernel_size)
+            ResidualBlock(input_size, hidden_size, dilation=1, kernel_size=kernel_size, dropout=dropout)
         )
         for i in range(1, depth):
             dilation = dilation_base ** i
-            self.residual_blocks.append(ResidualBlock(hidden_size, hidden_size, dilation, kernel_size))
+            self.residual_blocks.append(ResidualBlock(hidden_size, hidden_size, dilation, kernel_size, dropout=dropout))
         self.linear = nn.Linear(hidden_size, output_size, dtype=torch.float64)
         self.to(settings.device)
 
     def forward(self, x):
         out = self.residual_blocks(x)
         out = self.linear(out)
-        return out.reshape(-1, 12)
+        return torch.squeeze(out)
 
     def load_saved_model(self):
         state_dict = torch.load(os.path.join(self.path, 'model.pt'))
@@ -70,7 +70,8 @@ class ResidualBlock(nn.Module):
             out = self.pad(out)
             out = conv(out)
             out = self.relu(out)
-            out = self.dropout(out)
+            if self.training:
+                out = self.dropout(out)
 
         out += residual
         return self.relu(out)

@@ -17,7 +17,7 @@ def generate_plot(yhat, y, model):
     plt.grid()
 
 
-def plot(model_or_models, X_vals, y, start=0, end=2000, step=1):
+def plot(model_or_models, X_vals, y, start=0, end=2000, step=1, y_scaler=None):
     if isinstance(model_or_models, tuple):
         multiplot(model_or_models, X_vals, y, start, end, step)
         return
@@ -31,6 +31,8 @@ def plot(model_or_models, X_vals, y, start=0, end=2000, step=1):
 
     yhat = model(torch.tensor(X_vals[start:end:step]).to(settings.device))
     yhat = yhat.cpu().detach()
+    if y_scaler is not None:
+        yhat = yhat * y_scaler.scale_ + y_scaler.mean_
 
     if yhat.shape != y.shape:
         raise ValueError(

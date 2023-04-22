@@ -5,9 +5,9 @@ import settings
 from torch import nn
 
 
-class GatedRecurrentUnitNet(nn.Module):
+class GRU(nn.Module):
     def __init__(self, input_size, hidden_size, output_size=1, num_layers=2, dropout_prob=0.2):
-        super(GatedRecurrentUnitNet, self).__init__()
+        super(GRU, self).__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
         self.num_layers = num_layers
         self.hidden_size = hidden_size
