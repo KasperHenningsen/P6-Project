@@ -13,7 +13,7 @@ from utils.datasets import RegressionDataset
 from utils.plotting import plot_loss_history
 
 
-def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epochs, y_scaler, save_path=None, grad_clipping=None, ):
+def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epochs, y_scaler, save_path=None, grad_clipping=None):
     train_dataset = RegressionDataset(X_train, y_train)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=torch.Generator(device=settings.device))
     val_dataset = RegressionDataset(X_val, y_val)
@@ -109,7 +109,7 @@ def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epoc
     return [best_val_loss, best_val_smape, best_val_rmse]
 
 
-def test(model, X_test, y_test, batch_size, y_scaler=None):
+def test(model, X_test, y_test, batch_size, y_scaler):
     dataset = RegressionDataset(X_test, y_test)
     dataloader = DataLoader(dataset, batch_size=batch_size, generator=torch.Generator(device=settings.device))
     loss_fn = nn.L1Loss().to(settings.device)
