@@ -10,3 +10,5 @@ print(f'Training on device: {device}')
 
 models_path = '.\\saved-models'
 plots_path = '.\\plots'
+data_path = '.\\data'
+scripts_path = '.\\scripts'
