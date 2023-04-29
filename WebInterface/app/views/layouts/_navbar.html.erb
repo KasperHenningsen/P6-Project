@@ -4,16 +4,6 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <%= link_to 'Home', root_path, class:'nav-link' %>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Models
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <% %w[MLP GRU LSTM MTGNN RNN].each do |model| %>
-            <%= link_to "#{model}", url_for(controller: 'pages', action: model.downcase), class:'dropdown-item' %>
-            <% end %>
-          </ul>
-        </li>
         <%= link_to 'Heatmap', featurematrix_path, class:'nav-link' %>
       </div>
     </div>

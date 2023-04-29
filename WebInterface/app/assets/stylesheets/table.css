@@ -1,0 +1,10 @@
+
+.text-field {
+    color: #ffffff;
+    text-align: right;
+    max-width: 100px;
+}
+
+.date-field {
+    text-align: center;
+}

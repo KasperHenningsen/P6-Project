@@ -1,28 +1,4 @@
-<div class="container d-flex justify-content-center" data-controller="pages--home">
-  <div class="m-4 p-2 text-center" style="background: #dedede; border-radius: 5px;">
-    <%= form_with url: '/options', method: :get do |form| %>
-
-      <div>
-        <div class="pt-2 row d-flex justify-content-center">
-          <div class="col-4">
-            <%= form.label :start_date %>
-            <%= form.datetime_local_field :start_date, class: "form-control", id: 'start-date-input', step: 3600 %>
-          </div>
-
-          <div class="col-4">
-            <%= form.label :end_date %>
-            <%= form.datetime_local_field :end_date, class: "form-control", id: 'end-date-input', step: 3600 %>
-          </div>
-        </div>
-      </div>
-
-      <hr>
-
-      <div class="d-flex justify-content-center">
-        <%= submit_tag 'Confirm', options = { class: "btn btn-success", id: "submit-button" } %>
-      </div>
-
-    <% end %>
-  </div>
+<div class="container">
+  <%= link_to 'Consider adding something on the homepage you dofus', new_setting_path %>
 </div>
 

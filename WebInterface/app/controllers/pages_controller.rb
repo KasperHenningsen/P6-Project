@@ -1,14 +1,8 @@
 class PagesController < ApplicationController
   def home
+    redirect_to new_setting_path
   end
 
-  def options
-    @data_options = get_options
-  end
-
-  private
-
-  def get_options
-    [["From API", "api"], ["Upload CSV", "csv"], ["Manual entry", "manual"]]
+  def load
   end
 end

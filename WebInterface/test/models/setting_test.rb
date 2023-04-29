@@ -1,6 +1,6 @@
 require "test_helper"
 
-class NnModelControllerTest < ActionDispatch::IntegrationTest
+class SettingTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end
