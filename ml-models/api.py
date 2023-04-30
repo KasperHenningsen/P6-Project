@@ -18,7 +18,6 @@ import datetime
 import json
 import os
 
-
 app = Flask(__name__)
 
 featurematrix = f"{settings.scripts_path}\\correlation_coefficient_matrix.csv"
@@ -78,7 +77,7 @@ def get_cnn():
         return "Wrong format: end_date", 400
 
     cnn = get_model_object('cnn', horizon)
-    response = ready_inference(cnn, horizon, start_date, end_date)
+    response = get_inference_data(cnn, horizon, start_date, end_date)
 
     return make_response(response)
 
@@ -123,7 +122,7 @@ def get_model_object(model, horizon):
 
         cnn = CNN(input_channels, hidden_size, kernel_size, dropout_prob)
 
-        state_dict = torch.load(os.path.join('saved-models/CNN/horizon_12/model.pt'), map_location=settings.device)
+        state_dict = torch.load(os.path.join(f'saved-models/CNN/horizon_{horizon}/model.pt'))
         cnn.load_state_dict(state_dict)
         cnn.eval()
 
@@ -183,14 +182,67 @@ def get_model_object(model, horizon):
         return transformer.load_saved_model()
 
 
-def ready_inference(model, horizon, start_date, end_date):
-    data = get_processed_data('./data/open-weather-aalborg-2000-2022.csv')
-
+def get_inference_data(model, horizon, start_date, end_date):
     timedelta = datetime.timedelta(hours=horizon)
-    min_index = pd.to_datetime(data.index.min())
-    max_index = pd.to_datetime(data.index.max())
-    
 
+    min_index = pd.to_datetime(data.index.min())
+    min_inference = min_index + timedelta
+
+    max_index = pd.to_datetime(data.index.max())
+    max_inference = max_index - timedelta
+
+    result = []
+    if start_date < min_inference:
+        result = initialize_inference(model, horizon)
+        if end_date > min_inference:
+            result += rec_inference(model, horizon, min_index, end_date)
+    elif start_date > max_index:
+        result = rec_inference(model, horizon, max_inference, end_date)
+    elif start_date > min_inference:
+        result += rec_inference(model, horizon, min_inference, end_date)
+
+    crop_result(start_date, end_date, result)
+
+    return result
+
+
+def initialize_inference(model, horizon):
+    """
+    Backward infers the temperature values of the horizon before the dataset and the first horizon of the dataset,
+    since these sets cannot be infered forwards due to missing dataset values
+    :param model: The NN model used
+    :param horizon: The input/output horizon
+    :return: The horizon preceding the dataset and the first horizon's worth of inference
+    """
+    inference_set = []
+    one_hour = datetime.timedelta(hours=1)
+
+    for x in range(2, 0, -1):
+        input_data = data[horizon * (x - 1):horizon * x]
+        input_data = input_data[::-1]
+
+        data_tensor = torch.from_numpy(input_data.to_numpy())[:horizon]
+        data_tensor = data_tensor.reshape(1, horizon, 32)
+
+        result = model(data_tensor.to(settings.device)).detach().flatten().tolist()
+
+        inference_start_date = data.index[horizon * (x - 1)] - one_hour
+
+        for y in range(0, horizon):
+            inference = [result[(horizon - 1) - y], [inference_start_date - (one_hour * y)]]
+            inference_set.append(inference)
+
+    inference_set.reverse()
+
+    return inference_set
+
+
+def rec_inference(model, horizon, current_date, target_date, inference_set=None):
+    return
+
+
+def crop_result(start_date, end_date, inference_set):
+    return
 
 
 if __name__ == '__main__':
