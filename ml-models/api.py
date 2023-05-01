@@ -66,7 +66,85 @@ def get_models():
 
 @app.route('/predictions/models/cnn')
 def get_cnn():
-    args = request.args
+    params = verify_params(request.args)
+
+    cnn = get_model_object('cnn', params[0])
+    response = get_inference_data(cnn, params[0], params[1], params[2])
+
+    return make_response(response)
+
+
+@app.route('/predictions/models/mlp')
+def get_mlp():
+    params = verify_params(request.args)
+
+    mlp = get_model_object('mlp', params[0])
+    response = get_inference_data(mlp, params[0], params[1], params[2])
+
+    return make_response(response)
+
+
+@app.route('/predictions/models/gru')
+def get_gru():
+    params = verify_params(request.args)
+
+    gru = get_model_object('gru', params[0])
+    response = get_inference_data(gru, params[0], params[1], params[2])
+
+    return make_response(response)
+
+
+@app.route('/predictions/models/rnn')
+def get_rnn():
+    params = verify_params(request.args)
+
+    rnn = get_model_object('rnn', params[0])
+    response = get_inference_data(rnn, params[0], params[1], params[2])
+
+    return make_response(response)
+
+
+@app.route('/predictions/models/lstm')
+def get_lstm():
+    params = verify_params(request.args)
+
+    lstm = get_model_object('lstm', params[0])
+    response = get_inference_data(lstm, params[0], params[1], params[2])
+
+    return make_response(response)
+
+
+@app.route('/predictions/models/tcn')
+def get_tcn():
+    params = verify_params(request.args)
+
+    tcn = get_model_object('tcn', params[0])
+    response = get_inference_data(tcn, params[0], params[1], params[2])
+
+    return make_response(response)
+
+
+@app.route('/predictions/models/transformer')
+def get_transformer():
+    params = verify_params(request.args)
+
+    transformer = get_model_object('transformer', params[0])
+    response = get_inference_data(transformer, params[0], params[1], params[2])
+
+    return make_response(response)
+
+
+@app.route('/predictions/models/mtgnn')
+def get_mtgnn():
+    params = verify_params(request.args)
+
+    mtgnn = get_model_object('mtgnn', params[0])
+    response = get_inference_data(mtgnn, params[0], params[1], params[2])
+
+    return make_response(response)
+
+
+def verify_params(args):
     horizon = args.get('horizon', type=int)
     start_date = args.get('start_date', type=to_date)
     end_date = args.get('end_date', type=to_date)
@@ -76,110 +154,95 @@ def get_cnn():
     elif not (isinstance(end_date, datetime.date)):
         return "Wrong format: end_date", 400
 
-    cnn = get_model_object('cnn', horizon)
-    response = get_inference_data(cnn, horizon, start_date, end_date)
-
-    return make_response(response)
+    return [horizon, start_date, end_date]
 
 
-@app.route('/predictions/models/mtgnn')
-def get_mtgnn():
-    args = request.args
-    horizon = args.get('horizon')
-    # start_date = args.get('start_date', type=to_date)
-    # end_date = args.get('end_date', type=to_date)
-
-    model_json = json.load(open(f'{settings.models_path}\\MTGNN\\horizon_{horizon}\\log.json'))
-    model_params = model_json['model_parameters']
-
-    num_features = model_params['model_parameters']['num_features']
-    seq_length = model_params['model_parameters']['seq_length']
-    num_layers = model_params['model_parameters']['num_layers']
-    subgraph_size = model_params['model_parameters']['subgraph_size']
-    subgraph_node_dim = model_params['model_parameters']['subgraph_node_dim']
-    use_output_convolution = model_params['model_parameters']['use_output_convolution']
-    dropout = model_params['model_parameters']['dropout']
-
-    MTGNN(num_features, seq_length, num_layers, subgraph_size, subgraph_node_dim, use_output_convolution,
-          dropout)
-
-
+# TODO: Might remove timezone info from dates
 def to_date(string):
     date = datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S %z %Z").replace(tzinfo=None)
     return date
 
 
 def get_model_object(model, horizon):
-    model_path = f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}'
-    model_json = json.load(open(f'{model_path}\\log.json'))
-    model_params = model_json['model_parameters']
+    model_obj = None
+    if model == 'mtgnn':
+        model_json = json.load(open(f'{settings.models_path}\\MTGNN\\horizon_{horizon}\\log.json'))
+        model_params = model_json['model_parameters']
 
-    if model == 'cnn':
-        input_channels = model_params['input_channels']
-        hidden_size = model_params['hidden_size']
-        kernel_size = model_params['kernel_size']
-        dropout_prob = model_params['dropout']
+        num_features = model_params['model_parameters']['num_features']
+        seq_length = model_params['model_parameters']['seq_length']
+        num_layers = model_params['model_parameters']['num_layers']
+        subgraph_size = model_params['model_parameters']['subgraph_size']
+        subgraph_node_dim = model_params['model_parameters']['subgraph_node_dim']
+        use_output_convolution = model_params['model_parameters']['use_output_convolution']
+        dropout = model_params['model_parameters']['dropout']
 
-        cnn = CNN(input_channels, hidden_size, kernel_size, dropout_prob)
+        model_obj = MTGNN(num_features, seq_length, num_layers, subgraph_size, subgraph_node_dim,
+                          use_output_convolution, dropout)
+    else:
+        model_json = json.load(open(f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}\\log.json'))
+        model_params = model_json['model_parameters']
 
-        state_dict = torch.load(os.path.join(f'saved-models/CNN/horizon_{horizon}/model.pt'))
-        cnn.load_state_dict(state_dict)
-        cnn.eval()
+        if model == 'cnn':
+            input_channels = model_params['input_channels']
+            hidden_size = model_params['hidden_size']
+            kernel_size = model_params['kernel_size']
+            dropout_prob = model_params['dropout']
 
-        return cnn
-    elif model == 'mlp':
-        input_size = model_params['input_size']
-        hidden_size = model_params['hidden_size']
-        output_size = model_params['output_size']
-        num_layers = model_params['num_layers']
-        seq_length = model_params['seq_length']
+            model_obj = CNN(input_channels, hidden_size, kernel_size, dropout_prob)
+        elif model == 'mlp':
+            input_size = model_params['input_size']
+            hidden_size = model_params['hidden_size']
+            output_size = model_params['output_size']
+            num_layers = model_params['num_layers']
+            seq_length = model_params['seq_length']
 
-        mlp = MLP(input_size, hidden_size, output_size, num_layers, seq_length)
-        return mlp.load_saved_model()
-    elif model == 'gru':
-        input_size = model_params['input_size']
-        hidden_size = model_params['hidden_size']
-        output_size = model_params['output_size']
-        dropout_prob = model_params['dropout']
-        num_layers = model_params['num_layers']
+            model_obj = MLP(input_size, hidden_size, output_size, num_layers, seq_length)
+        elif model == 'gru':
+            input_size = model_params['input_size']
+            hidden_size = model_params['hidden_size']
+            output_size = model_params['output_size']
+            dropout_prob = model_params['dropout']
+            num_layers = model_params['num_layers']
 
-        gru = GRU(input_size, hidden_size, output_size, dropout_prob, num_layers)
-        return gru.load_saved_model()
-    elif model == 'rnn':
-        input_size = model_params['input_size']
-        hidden_size = model_params['hidden_size']
-        output_size = model_params['output_size']
-        dropout_prob = model_params['dropout']
-        num_layers = model_params['num_layers']
+            model_obj = GRU(input_size, hidden_size, output_size, dropout_prob, num_layers)
+        elif model == 'rnn':
+            input_size = model_params['input_size']
+            hidden_size = model_params['hidden_size']
+            output_size = model_params['output_size']
+            dropout_prob = model_params['dropout']
+            num_layers = model_params['num_layers']
 
-        rnn = RNN(input_size, hidden_size, output_size, dropout_prob, num_layers)
-        return rnn.load_saved_model()
-    elif model == 'lstm':
-        input_size = model_params['input_size']
-        hidden_size = model_params['hidden_size']
-        output_size = model_params['output_size']
-        dropout_prob = model_params['dropout']
-        num_layers = model_params['num_layers']
+            model_obj = RNN(input_size, hidden_size, output_size, dropout_prob, num_layers)
+        elif model == 'lstm':
+            input_size = model_params['input_size']
+            hidden_size = model_params['hidden_size']
+            output_size = model_params['output_size']
+            dropout_prob = model_params['dropout']
+            num_layers = model_params['num_layers']
 
-        lstm = LSTM(input_size, hidden_size, output_size, dropout_prob, num_layers)
-        return lstm.load_saved_model()
-    elif model == 'tcn':
-        input_size = model_params['input_size']
-        output_size = model_params['output_size']
-        hidden_size = model_params['hidden_size']
+            model_obj = LSTM(input_size, hidden_size, output_size, dropout_prob, num_layers)
+        elif model == 'tcn':
+            input_size = model_params['input_size']
+            output_size = model_params['output_size']
+            hidden_size = model_params['hidden_size']
 
-        tcn = TCN(input_size, output_size, hidden_size)
-        return tcn.load_saved_model()
-    elif model == 'transformer':
-        input_size = model_params['input_size']
-        d_model = model_params['d_model']
-        nhead = model_params['nhead']
-        num_layers = model_params['num_layers']
-        output_size = model_params['output_size']
-        dropout = model_params['dropout']
+            model_obj = TCN(input_size, output_size, hidden_size)
+        elif model == 'transformer':
+            input_size = model_params['input_size']
+            d_model = model_params['d_model']
+            nhead = model_params['nhead']
+            num_layers = model_params['num_layers']
+            output_size = model_params['output_size']
+            dropout = model_params['dropout']
 
-        transformer = Transformer(input_size, d_model, nhead, num_layers, output_size, dropout)
-        return transformer.load_saved_model()
+            model_obj = Transformer(input_size, d_model, nhead, num_layers, output_size, dropout)
+
+    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'))
+    model_obj.load_state_dict(state_dict)
+    model_obj.eval()
+
+    return model_obj
 
 
 def get_inference_data(model, horizon, start_date, end_date):
@@ -233,7 +296,7 @@ def initialize_inference(model, horizon):
             inference_res = [result[(horizon - 1) - y], inference_start_date - (one_hour * y)]
             inference_set.append(inference_res)
 
-    # TODO: Muligvis ikke korrekt, dunno før model er fikset
+    # TODO: Might not be correct, would be easier to verify with less sporadic models
     inference_set.reverse()
 
     return inference_set
@@ -249,7 +312,8 @@ def inference(model, horizon, start_date, end_date, inference_set=None):
     current_date = start_date - time_horizon
 
     inference_step = 1
-    while current_date + time_horizon < end_date and current_date <= pd.to_datetime(data.index.max()) or inference_step == 1:
+    while current_date + time_horizon < end_date and current_date <= pd.to_datetime(
+            data.index.max()) or inference_step == 1:
         start_index = current_date
         end_index = start_index + time_horizon - one_hour
         input_data = data[start_index:end_index]
