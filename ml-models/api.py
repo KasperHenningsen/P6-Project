@@ -192,16 +192,17 @@ def get_inference_data(model, horizon, start_date, end_date):
     max_inference = max_index - timedelta
 
     result = []
+
     if start_date < min_inference:
         result = initialize_inference(model, horizon)
         if end_date > min_inference:
-            result += rec_inference(model, horizon, min_index, end_date)
+            result += inference(model, horizon, min_inference, end_date, result)
     elif start_date > max_index:
-        result = rec_inference(model, horizon, max_inference, end_date)
-    elif start_date > min_inference:
-        result += rec_inference(model, horizon, min_inference, end_date)
+        result = inference(model, horizon, max_inference, end_date)
+    elif start_date >= min_inference:
+        result = inference(model, horizon, start_date, end_date)
 
-    crop_result(start_date, end_date, result)
+    result = crop_result(start_date, end_date, result)
 
     return result
 
@@ -229,20 +230,58 @@ def initialize_inference(model, horizon):
         inference_start_date = data.index[horizon * (x - 1)] - one_hour
 
         for y in range(0, horizon):
-            inference = [result[(horizon - 1) - y], [inference_start_date - (one_hour * y)]]
-            inference_set.append(inference)
+            inference_res = [result[(horizon - 1) - y], inference_start_date - (one_hour * y)]
+            inference_set.append(inference_res)
 
+    # TODO: Muligvis ikke korrekt, dunno før model er fikset
     inference_set.reverse()
 
     return inference_set
 
 
-def rec_inference(model, horizon, current_date, target_date, inference_set=None):
-    return
+def inference(model, horizon, start_date, end_date, inference_set=None):
+    if inference_set is None:
+        inference_set = []
+
+    one_hour = datetime.timedelta(hours=1)
+    time_horizon = datetime.timedelta(hours=horizon)
+
+    current_date = start_date - time_horizon
+
+    inference_step = 1
+    while current_date + time_horizon < end_date and current_date <= pd.to_datetime(data.index.max()) or inference_step == 1:
+        start_index = current_date
+        end_index = start_index + time_horizon - one_hour
+        input_data = data[start_index:end_index]
+
+        data_tensor = torch.from_numpy(input_data.to_numpy())[:horizon]
+        data_tensor = data_tensor.reshape(1, horizon, 32)
+
+        result = model(data_tensor.to(settings.device)).detach().flatten().tolist()
+
+        for y in range(0, horizon):
+            inference_res = [result[y], start_index + time_horizon + (one_hour * y)]
+            inference_set.append(inference_res)
+
+        current_date += time_horizon
+        inference_step += 1
+
+    return inference_set
 
 
 def crop_result(start_date, end_date, inference_set):
-    return
+    start_index = 0
+    end_index = 0
+
+    for i, inference_res in enumerate(inference_set):
+        if start_date in inference_res:
+            start_index = i
+        elif end_date in inference_res:
+            end_index = i
+
+    result = inference_set[start_index:end_index + 1]
+
+    return result
 
 
 if __name__ == '__main__':
