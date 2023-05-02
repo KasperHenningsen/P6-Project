@@ -44,7 +44,7 @@ def get_data_full():
     dates = np.ndarray.tolist(data.index.to_pydatetime())
     temp = np.ndarray.tolist(data["temp"].values)
 
-    response = list(zip(dates, temp))
+    response = list(zip(temp, dates))
 
     return make_response(response)
 
@@ -57,8 +57,12 @@ def get_data_subset():
     date_params = verify_date_params(request.args)
 
     data_subset = data[date_params[0]:date_params[1]]
+    dates = np.ndarray.tolist(data_subset.index.to_pydatetime())
+    temp = np.ndarray.tolist(data_subset["temp"].values)
 
-    return make_response(data_subset)
+    response = list(zip(temp, dates))
+
+    return make_response(response)
 
 
 @app.route('/actuals/dates')
@@ -205,6 +209,12 @@ def handle_bad_request(e):
 
 
 def get_model_object(model, horizon):
+    """
+    Gets the model object based on model name as string and a horizon
+    :param model: The models name in the form of a string
+    :param horizon: The input/output horizon that the model is trained with
+    :return: A model object
+    """
     model_obj = None
     if model == 'mtgnn':
         model_json = json.load(open(f'{settings.models_path}\\MTGNN\\horizon_{horizon}\\log.json'))
@@ -307,90 +317,105 @@ def get_inference_data(model, horizon, start_date, end_date):
     result = []
 
     if start_date < min_inference:
-        result = initialize_inference(model, horizon)
+        result = infer_start(model, horizon)
         if end_date > min_inference:
-            result += inference(model, horizon, min_inference, end_date, result)
+            result += infer_range(model, horizon, min_inference, end_date, result)
     elif start_date > max_index:
-        result = inference(model, horizon, max_inference, end_date)
+        result = infer_range(model, horizon, max_inference, end_date)
     elif start_date >= min_inference:
-        result = inference(model, horizon, start_date, end_date)
+        result = infer_range(model, horizon, start_date, end_date)
 
     result = crop_result(start_date, end_date, result)
 
     return result
 
 
-def initialize_inference(model, horizon):
+def infer_start(model, horizon):
     """
-    Backward infers the temperature values of the horizon before the dataset and the first horizon of the dataset,
-    since these sets cannot be inferred forwards due to missing dataset values
+    Backward infers the temperature values of the horizon before the dataset and the first horizon of the dataset, since these sets cannot be inferred forwards due to missing dataset values
     :param model: The NN model used
     :param horizon: The input/output horizon
     :return: The horizon preceding the dataset and the first horizon's worth of inference
     """
-    inference_set = []
+    result = []
     one_hour = datetime.timedelta(hours=1)
 
     for x in range(2, 0, -1):
         input_data = data[horizon * (x - 1):horizon * x]
         input_data = input_data[::-1]
 
-        data_tensor = torch.from_numpy(input_data.to_numpy())[:horizon]
-        data_tensor = data_tensor.reshape(1, horizon, 32)
-
-        result = model(data_tensor.to(settings.device)).detach().flatten().tolist()
+        inference_set = infer(model, horizon, input_data)
 
         inference_start_date = data.index[horizon * (x - 1)] - one_hour
 
         for y in range(0, horizon):
-            inference_res = [result[(horizon - 1) - y], inference_start_date - (one_hour * y)]
-            inference_set.append(inference_res)
+            inference = [inference_set[(horizon - 1) - y], inference_start_date - (one_hour * y)]
+            result.append(inference)
 
-    inference_set.reverse()
+    result.reverse()
 
-    return inference_set
+    return result
 
 
-def inference(model, horizon, start_date, end_date, inference_set=None):
+def infer_range(model, horizon, start_date, end_date, result=None):
     """
-    Handles the majority of the inference, inferring horizon by horizon until the end date is reached
+    Infers horizon by horizon until the end date is reached
     :param model: The NN model used
     :param horizon: The input/output horizon
     :param start_date: The start date of the inference
     :param end_date: The end date of the inference
-    :param inference_set: The final set of inferences created in the function
+    :param result: The final set of inferences created in the function
     :return: A nested list of inferences where, [x][0] is the inferred temperature and [x][1] is the date of the temperature
     """
-    if inference_set is None:
-        inference_set = []
+    if result is None:
+        result = []
 
     one_hour = datetime.timedelta(hours=1)
     time_horizon = datetime.timedelta(hours=horizon)
 
-    current_date = start_date - time_horizon
+    current_date = start_date
+    current_index = start_date - time_horizon
 
-    inference_step = 1
-    while current_date + time_horizon < end_date and current_date <= pd.to_datetime(
-            data.index.max()) or inference_step == 1:
-        start_index = current_date
-        end_index = start_index + time_horizon - one_hour
-        input_data = data[start_index:end_index]
-        input_data = X_scaler.transform(input_data)
+    while current_index < end_date and current_index <= pd.to_datetime(data.index.max()):
+        end_index = current_index + time_horizon
 
-        data_tensor = torch.from_numpy(input_data)[:horizon]
-        data_tensor = data_tensor.reshape(1, horizon, 32)
+        if end_index <= data.index.max():
+            input_data = data[current_index:end_index]
 
-        result = model(data_tensor.to(settings.device)).detach()
-        result = y_scaler.inverse_transform(result).flatten()
+            inference_set = infer(model, horizon, input_data)
+        else:
+            input_data = data[data.index.max() - time_horizon:data.index.max()]
 
-        for y in range(0, horizon):
-            inference_res = [result[y], start_index + time_horizon + (one_hour * y)]
-            inference_set.append(inference_res)
+            inference_set = infer(model, horizon, input_data)
+            inference_set = inference_set[-(horizon - end_index.hour):]
+
+        for y in range(0, len(inference_set)):
+            inference = [inference_set[y], current_index + time_horizon + (one_hour * y)]
+            result.append(inference)
 
         current_date += time_horizon
-        inference_step += 1
+        current_index += time_horizon
 
-    return inference_set
+    return result
+
+
+def infer(model, horizon, input_data):
+    """
+    Infers temp values based on given model, horizon and input data
+    :param model: The model used in the inference
+    :param horizon: The input/output horizon
+    :param input_data: The data to infer from
+    :return: A scaled list of inferences
+    """
+    input_data = X_scaler.transform(input_data)
+
+    data_tensor = torch.from_numpy(input_data)[:horizon]
+    data_tensor = data_tensor.reshape(1, horizon, 32).to(settings.device)
+
+    result = model(data_tensor).cpu().detach()
+    result = y_scaler.inverse_transform(result).flatten()
+
+    return result
 
 
 def crop_result(start_date, end_date, inference_set):
