@@ -36,8 +36,8 @@ def get_feature_matrix():
     return send_file(featurematrix)
 
 
-@app.route('/dataset')
-def get_dataset():
+@app.route('/actuals/full')
+def get_data_full():
     """
     :return: A list of datetime/temp tuples over the entire dataset
     """
@@ -49,7 +49,19 @@ def get_dataset():
     return make_response(response)
 
 
-@app.route('/dataset/dates')
+@app.route('/actuals/subset')
+def get_data_subset():
+    """
+    :return: A subset list of the datetime/temp tuples over a date range
+    """
+    date_params = verify_date_params(request.args)
+
+    data_subset = data[date_params[0]:date_params[1]]
+
+    return make_response(data_subset)
+
+
+@app.route('/actuals/dates')
 def get_dates():
     """
     :return: The min and max datetimes present in the dataset
@@ -69,104 +81,122 @@ def get_models():
 
 @app.route('/predictions/models/cnn')
 def get_cnn():
-    params = verify_params(request.args)
+    date_params = verify_date_params(request.args)
+    horizon = verify_horizon_param(request.args)
 
-    cnn = get_model_object('cnn', params[0])
-    response = get_inference_data(cnn, params[0], params[1], params[2])
+    cnn = get_model_object('cnn', horizon)
+    response = get_inference_data(cnn, horizon, date_params[0], date_params[1])
 
     return make_response(response)
 
 
 @app.route('/predictions/models/mlp')
 def get_mlp():
-    params = verify_params(request.args)
+    date_params = verify_date_params(request.args)
+    horizon = verify_horizon_param(request.args)
 
-    mlp = get_model_object('mlp', params[0])
-    response = get_inference_data(mlp, params[0], params[1], params[2])
+    mlp = get_model_object('mlp', horizon)
+    response = get_inference_data(mlp, horizon, date_params[0], date_params[1])
 
     return make_response(response)
 
 
 @app.route('/predictions/models/gru')
 def get_gru():
-    params = verify_params(request.args)
+    date_params = verify_date_params(request.args)
+    horizon = verify_horizon_param(request.args)
 
-    gru = get_model_object('gru', params[0])
-    response = get_inference_data(gru, params[0], params[1], params[2])
+    gru = get_model_object('gru', horizon)
+    response = get_inference_data(gru, horizon, date_params[0], date_params[1])
 
     return make_response(response)
 
 
 @app.route('/predictions/models/rnn')
 def get_rnn():
-    params = verify_params(request.args)
+    date_params = verify_date_params(request.args)
+    horizon = verify_horizon_param(request.args)
 
-    rnn = get_model_object('rnn', params[0])
-    response = get_inference_data(rnn, params[0], params[1], params[2])
+    rnn = get_model_object('rnn', horizon)
+    response = get_inference_data(rnn, horizon, date_params[0], date_params[1])
 
     return make_response(response)
 
 
 @app.route('/predictions/models/lstm')
 def get_lstm():
-    params = verify_params(request.args)
+    date_params = verify_date_params(request.args)
+    horizon = verify_horizon_param(request.args)
 
-    lstm = get_model_object('lstm', params[0])
-    response = get_inference_data(lstm, params[0], params[1], params[2])
+    lstm = get_model_object('lstm', horizon)
+    response = get_inference_data(lstm, horizon, date_params[0], date_params[1])
 
     return make_response(response)
 
 
 @app.route('/predictions/models/tcn')
 def get_tcn():
-    params = verify_params(request.args)
+    date_params = verify_date_params(request.args)
+    horizon = verify_horizon_param(request.args)
 
-    tcn = get_model_object('tcn', params[0])
-    response = get_inference_data(tcn, params[0], params[1], params[2])
+    tcn = get_model_object('tcn', horizon)
+    response = get_inference_data(tcn, horizon, date_params[0], date_params[1])
 
     return make_response(response)
 
 
 @app.route('/predictions/models/transformer')
 def get_transformer():
-    params = verify_params(request.args)
+    date_params = verify_date_params(request.args)
+    horizon = verify_horizon_param(request.args)
 
-    transformer = get_model_object('transformer', params[0])
-    response = get_inference_data(transformer, params[0], params[1], params[2])
+    transformer = get_model_object('transformer', horizon)
+    response = get_inference_data(transformer, horizon, date_params[0], date_params[1])
 
     return make_response(response)
 
 
 @app.route('/predictions/models/mtgnn')
 def get_mtgnn():
-    params = verify_params(request.args)
+    date_params = verify_date_params(request.args)
+    horizon = verify_horizon_param(request.args)
 
-
-    mtgnn = get_model_object('mtgnn', params[0])
-    response = get_inference_data(mtgnn, params[0], params[1], params[2])
+    mtgnn = get_model_object('mtgnn', horizon)
+    response = get_inference_data(mtgnn, horizon, date_params[0], date_params[1])
 
     return make_response(response)
 
 
-def verify_params(args):
+def verify_date_params(args):
     """
     Verifies that the date arguments given in the url is of the correct format
-    :param args: The arguments given in the url
+    :param args: A dict of arguments given in the url
     :return: An array of the verified arguments, where [0] is the input/output horizon and [1] and [2] are the start and end dates respectively.
     """
-    horizon = args.get('horizon', type=int)
     start_date = args.get('start_date', type=datetime.datetime.fromisoformat)
     end_date = args.get('end_date', type=datetime.datetime.fromisoformat)
 
-    valid_horizons = [12, 24, 36]
-    if horizon not in valid_horizons:
-        raise werkzeug.exceptions.BadRequest(f'Invalid horizon: {horizon}\nValid horizons include {valid_horizons}')
-    elif not (isinstance(start_date, datetime.datetime)):
+    if not (isinstance(start_date, datetime.datetime)):
         raise werkzeug.exceptions.BadRequest('Wrong format: start_date\nA valid format is e.g. 2000-1-1 00:00:00')
     elif not (isinstance(end_date, datetime.datetime)):
         raise werkzeug.exceptions.BadRequest('Wrong format: end_date\nA valid format is e.g. 2000-1-1 00:00:00')
 
-    return [horizon, start_date, end_date]
+    return [start_date, end_date]
+
+
+def verify_horizon_param(args):
+    """
+    Verifies that the horizon argument is valid
+    :param args: A dict of arguments given in the url
+    :return: The verified horizon given that it is correct
+    """
+    horizon = args.get('horizon', type=int)
+
+    valid_horizons = [12, 24, 36]
+    if horizon not in valid_horizons:
+        raise werkzeug.exceptions.BadRequest(f'Invalid horizon: {horizon}\nValid horizons include {valid_horizons}')
+
+    return horizon
 
 
 @app.errorhandler(werkzeug.exceptions.BadRequest)
@@ -188,7 +218,8 @@ def get_model_object(model, horizon):
         use_output_convolution = model_params['model_parameters']['use_output_convolution']
         dropout = model_params['model_parameters']['dropout']
 
-        model_obj = MTGNN(num_features, seq_length, num_layers, subgraph_size, subgraph_node_dim, use_output_convolution, dropout)
+        model_obj = MTGNN(num_features, seq_length, num_layers, subgraph_size, subgraph_node_dim,
+                          use_output_convolution, dropout)
     else:
         model_json = json.load(open(f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}\\log.json'))
         model_params = model_json['model_parameters']
@@ -248,7 +279,8 @@ def get_model_object(model, horizon):
 
             model_obj = Transformer(input_size, d_model, nhead, num_layers, output_size, dropout)
 
-    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'), map_location=settings.device)
+    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'),
+                            map_location=settings.device)
     model_obj.load_state_dict(state_dict)
     model_obj.eval()
 
@@ -338,7 +370,8 @@ def inference(model, horizon, start_date, end_date, inference_set=None):
     current_date = start_date - time_horizon
 
     inference_step = 1
-    while current_date + time_horizon < end_date and current_date <= pd.to_datetime(data.index.max()) or inference_step == 1:
+    while current_date + time_horizon < end_date and current_date <= pd.to_datetime(
+            data.index.max()) or inference_step == 1:
         start_index = current_date
         end_index = start_index + time_horizon - one_hour
         input_data = data[start_index:end_index]
