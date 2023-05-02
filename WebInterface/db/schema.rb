@@ -10,19 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_07_035454) do
-# Could not dump table "correlation_coefficient_matrix" because of following StandardError
-#   Unknown type 'REAL' for column 'temp'
-
-  create_table "graphs_controllers", force: :cascade do |t|
+ActiveRecord::Schema[7.0].define(version: 2023_04_23_161841) do
+  create_table "settings", force: :cascade do |t|
+    t.datetime "start_date", null: false
+    t.datetime "end_date", null: false
+    t.integer "horizon", null: false
+    t.string "models", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "temperatures", id: false, force: :cascade do |t|
-    t.integer "date", null: false
-    t.float "temp_min"
-    t.float "temp_max"
   end
 
 end

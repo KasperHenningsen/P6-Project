@@ -1,17 +1,5 @@
-<div class="container pt-2" data-controller="flatpickr" data-flatpickr-dates='<%= @dates.map { |date| "#{date};" }.join('') %>' >
+<div class="container pt-2" data-controller="flatpickr" data-flatpickr-dates='<%= @dates.map { |date| "#{date};" }.join('') %>'>
   <%= form_with model: setting do |form| %>
-    
-    <% if setting.errors.any? %>
-      <div style="color: red">
-        <h2><%= pluralize(setting.errors.count, "error") %> prohibited this setting from being saved:</h2>
-
-        <ul>
-          <% setting.errors.each do |error| %>
-            <li><%= error.full_message %></li>
-          <% end %>
-        </ul>
-      </div>
-    <% end %>
 
     <div>
       <div class="input-group mb-3">
@@ -19,12 +7,12 @@
         <%= form.datetime_field :start_date, { class: "form-control flatpickr-date-field", placeholder: 'DD-MM-YYYY HH:mm', required: true } %>
       </div>
 
-      <div class="input-group mb-3" >
+      <div class="input-group mb-3">
         <%= form.label :end_date, class: 'input-group-text', for: 'setting_end_date', style: 'min-width: 100px' %>
         <%= form.datetime_field :end_date, { class: "form-control flatpickr-date-field", placeholder: 'DD-MM-YYYY HH:mm', required: true } %>
       </div>
 
-      <div class="input-group mb-3" >
+      <div class="input-group mb-3">
         <%= form.label :horizon, class: 'input-group-text', for: 'setting_horizon', style: 'min-width: 100px' %>
         <%= form.select :horizon, @horizons, {}, { class: 'form-select' } %>
       </div>
@@ -45,7 +33,7 @@
 
       <div>
         <%= link_to 'Cancel', root_path, { class: 'btn btn-danger', style: 'width: 100px;' } %>
-        <%= form.submit 'Apply', { class: 'btn btn-success', style: 'width: 100px;'}%>
+        <%= form.submit 'Apply', { class: 'btn btn-success', style: 'width: 100px;' } %>
       </div>
     </div>
 

@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   root 'pages#home'
 
   # Pages
-  get 'load', to: 'pages#load'
+  get 'graph', to: 'pages#graph'
 
   # Feature Matrix
   get 'featurematrix', to: 'feature_matrix#index'
