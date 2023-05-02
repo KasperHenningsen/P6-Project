@@ -2,6 +2,7 @@ import joblib
 import pandas as pd
 import numpy as np
 import torch
+import werkzeug.exceptions
 from flask import Flask, request, send_file, make_response
 
 import settings
@@ -35,7 +36,6 @@ def get_feature_matrix():
     return send_file(featurematrix)
 
 
-# TODO: Remove?
 @app.route('/dataset')
 def get_dataset():
     """
@@ -141,6 +141,7 @@ def get_transformer():
 def get_mtgnn():
     params = verify_params(request.args)
 
+
     mtgnn = get_model_object('mtgnn', params[0])
     response = get_inference_data(mtgnn, params[0], params[1], params[2])
 
@@ -151,25 +152,26 @@ def verify_params(args):
     """
     Verifies that the date arguments given in the url is of the correct format
     :param args: The arguments given in the url
-    :return: An array of the verified arguments, where [0] is the input/output horizon and [1] and [2] are
-    the start and end dates respectively.
+    :return: An array of the verified arguments, where [0] is the input/output horizon and [1] and [2] are the start and end dates respectively.
     """
     horizon = args.get('horizon', type=int)
     start_date = args.get('start_date', type=datetime.datetime.fromisoformat)
     end_date = args.get('end_date', type=datetime.datetime.fromisoformat)
 
-    if not (isinstance(start_date, datetime.datetime)):
-        return "Wrong format: start_date", 400
+    valid_horizons = [12, 24, 36]
+    if horizon not in valid_horizons:
+        raise werkzeug.exceptions.BadRequest(f'Invalid horizon: {horizon}\nValid horizons include {valid_horizons}')
+    elif not (isinstance(start_date, datetime.datetime)):
+        raise werkzeug.exceptions.BadRequest('Wrong format: start_date\nA valid format is e.g. 2000-1-1 00:00:00')
     elif not (isinstance(end_date, datetime.datetime)):
-        return "Wrong format: end_date", 400
+        raise werkzeug.exceptions.BadRequest('Wrong format: end_date\nA valid format is e.g. 2000-1-1 00:00:00')
 
     return [horizon, start_date, end_date]
 
 
-# TODO: Might remove timezone info from dates
-def to_date(string):
-    date = datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S %z %Z").replace(tzinfo=None)
-    return date
+@app.errorhandler(werkzeug.exceptions.BadRequest)
+def handle_bad_request(e):
+    return e, 400
 
 
 def get_model_object(model, horizon):
@@ -186,8 +188,7 @@ def get_model_object(model, horizon):
         use_output_convolution = model_params['model_parameters']['use_output_convolution']
         dropout = model_params['model_parameters']['dropout']
 
-        model_obj = MTGNN(num_features, seq_length, num_layers, subgraph_size, subgraph_node_dim,
-                          use_output_convolution, dropout)
+        model_obj = MTGNN(num_features, seq_length, num_layers, subgraph_size, subgraph_node_dim, use_output_convolution, dropout)
     else:
         model_json = json.load(open(f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}\\log.json'))
         model_params = model_json['model_parameters']
@@ -265,10 +266,10 @@ def get_inference_data(model, horizon, start_date, end_date):
     """
     timedelta = datetime.timedelta(hours=horizon)
 
-    min_index = pd.to_datetime(data.index.min())
+    min_index = data.index.min()
     min_inference = min_index + timedelta
 
-    max_index = pd.to_datetime(data.index.max())
+    max_index = data.index.max()
     max_inference = max_index - timedelta
 
     result = []
@@ -313,7 +314,6 @@ def initialize_inference(model, horizon):
             inference_res = [result[(horizon - 1) - y], inference_start_date - (one_hour * y)]
             inference_set.append(inference_res)
 
-    # TODO: Might not be correct, would be easier to verify with less sporadic models
     inference_set.reverse()
 
     return inference_set
@@ -338,8 +338,7 @@ def inference(model, horizon, start_date, end_date, inference_set=None):
     current_date = start_date - time_horizon
 
     inference_step = 1
-    while current_date + time_horizon < end_date and current_date <= pd.to_datetime(
-            data.index.max()) or inference_step == 1:
+    while current_date + time_horizon < end_date and current_date <= pd.to_datetime(data.index.max()) or inference_step == 1:
         start_index = current_date
         end_index = start_index + time_horizon - one_hour
         input_data = data[start_index:end_index]
