@@ -1,0 +1,35 @@
+{
+  "model": "RNN",
+  "trained_at": "2023-04-23T18:03:29.728942",
+  "train_time_seconds": 982,
+  "loss": {
+    "validation": {
+      "mae": 1.4360104503313458,
+      "smape": 0.3095805355184656,
+      "rmse": 1.7428861257648405
+    },
+    "test": {
+      "mae": 1.504706429356539,
+      "smape": 0.28483545013836453,
+      "rmse": 1.9396339090689696
+    }
+  },
+  "hyperparameters": {
+    "seq_len": 12,
+    "target_len": 12,
+    "target_col": "temp",
+    "batch_size": 32,
+    "epochs": 15,
+    "learning_rate": 0.0001,
+    "train_size": 0.6,
+    "grad_clipping": null
+  },
+  "model_parameters": {
+    "input_size": 32,
+    "hidden_size": 256,
+    "output_size": 1,
+    "num_layers": 3,
+    "dropout": 0.2,
+    "nonlinearity": "tanh"
+  }
+}
