@@ -1,10 +1,11 @@
+import joblib
 import pandas as pd
 import numpy as np
 import torch
 from flask import Flask, request, send_file, make_response
 
 import settings
-from utils.data_utils import get_processed_data
+from utils.data_utils import get_processed_data, prepare_X_and_y
 from baselines.cnn import CNN
 from baselines.gru import GRU
 from baselines.mlp import MLP
@@ -22,6 +23,8 @@ app = Flask(__name__)
 
 featurematrix = f"{settings.scripts_path}\\correlation_coefficient_matrix.csv"
 data = get_processed_data(f"{settings.data_path}\\open-weather-aalborg-2000-2022.csv")
+X_scaler = joblib.load('./saved-models/X_scaler.gz')
+y_scaler = joblib.load('./saved-models/y_scaler.gz')
 
 
 @app.route('/featurematrix')
@@ -146,12 +149,12 @@ def get_mtgnn():
 
 def verify_params(args):
     horizon = args.get('horizon', type=int)
-    start_date = args.get('start_date', type=to_date)
-    end_date = args.get('end_date', type=to_date)
+    start_date = args.get('start_date', type=datetime.datetime.fromisoformat)
+    end_date = args.get('end_date', type=datetime.datetime.fromisoformat)
 
-    if not (isinstance(start_date, datetime.date)):
+    if not (isinstance(start_date, datetime.datetime)):
         return "Wrong format: start_date", 400
-    elif not (isinstance(end_date, datetime.date)):
+    elif not (isinstance(end_date, datetime.datetime)):
         return "Wrong format: end_date", 400
 
     return [horizon, start_date, end_date]
@@ -238,7 +241,7 @@ def get_model_object(model, horizon):
 
             model_obj = Transformer(input_size, d_model, nhead, num_layers, output_size, dropout)
 
-    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'))
+    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'), map_location=torch.device(settings.device))
     model_obj.load_state_dict(state_dict)
     model_obj.eval()
 
@@ -317,11 +320,13 @@ def inference(model, horizon, start_date, end_date, inference_set=None):
         start_index = current_date
         end_index = start_index + time_horizon - one_hour
         input_data = data[start_index:end_index]
+        input_data = X_scaler.transform(input_data)
 
-        data_tensor = torch.from_numpy(input_data.to_numpy())[:horizon]
+        data_tensor = torch.from_numpy(input_data)[:horizon]
         data_tensor = data_tensor.reshape(1, horizon, 32)
 
-        result = model(data_tensor.to(settings.device)).detach().flatten().tolist()
+        result = model(data_tensor.to(settings.device)).detach()
+        result = y_scaler.inverse_transform(result).flatten()
 
         for y in range(0, horizon):
             inference_res = [result[y], start_index + time_horizon + (one_hour * y)]
