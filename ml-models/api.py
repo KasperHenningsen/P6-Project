@@ -5,7 +5,7 @@ import torch
 from flask import Flask, request, send_file, make_response
 
 import settings
-from utils.data_utils import get_processed_data, prepare_X_and_y
+from utils.data_utils import get_processed_data
 from baselines.cnn import CNN
 from baselines.gru import GRU
 from baselines.mlp import MLP
@@ -148,6 +148,12 @@ def get_mtgnn():
 
 
 def verify_params(args):
+    """
+    Verifies that the date arguments given in the url is of the correct format
+    :param args: The arguments given in the url
+    :return: An array of the verified arguments, where [0] is the input/output horizon and [1] and [2] are
+    the start and end dates respectively.
+    """
     horizon = args.get('horizon', type=int)
     start_date = args.get('start_date', type=datetime.datetime.fromisoformat)
     end_date = args.get('end_date', type=datetime.datetime.fromisoformat)
@@ -241,7 +247,7 @@ def get_model_object(model, horizon):
 
             model_obj = Transformer(input_size, d_model, nhead, num_layers, output_size, dropout)
 
-    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'), map_location=torch.device(settings.device))
+    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'), map_location=settings.device)
     model_obj.load_state_dict(state_dict)
     model_obj.eval()
 
@@ -249,6 +255,14 @@ def get_model_object(model, horizon):
 
 
 def get_inference_data(model, horizon, start_date, end_date):
+    """
+    Initializes the inference of the data range, based on the start and end dates and crops the final result
+    :param model: The model inferred from
+    :param horizon: The input/output horizon
+    :param start_date: The start date of the inferrence
+    :param end_date: The end date of the inferrence
+    :return: The final result of the inferrence
+    """
     timedelta = datetime.timedelta(hours=horizon)
 
     min_index = pd.to_datetime(data.index.min())
@@ -276,7 +290,7 @@ def get_inference_data(model, horizon, start_date, end_date):
 def initialize_inference(model, horizon):
     """
     Backward infers the temperature values of the horizon before the dataset and the first horizon of the dataset,
-    since these sets cannot be infered forwards due to missing dataset values
+    since these sets cannot be inferred forwards due to missing dataset values
     :param model: The NN model used
     :param horizon: The input/output horizon
     :return: The horizon preceding the dataset and the first horizon's worth of inference
@@ -306,6 +320,15 @@ def initialize_inference(model, horizon):
 
 
 def inference(model, horizon, start_date, end_date, inference_set=None):
+    """
+    Handles the majority of the inference, inferring horizon by horizon until the end date is reached
+    :param model: The NN model used
+    :param horizon: The input/output horizon
+    :param start_date: The start date of the inference
+    :param end_date: The end date of the inference
+    :param inference_set: The final set of inferences created in the function
+    :return: A nested list of inferences where, [x][0] is the inferred temperature and [x][1] is the date of the temperature
+    """
     if inference_set is None:
         inference_set = []
 
@@ -339,6 +362,13 @@ def inference(model, horizon, start_date, end_date, inference_set=None):
 
 
 def crop_result(start_date, end_date, inference_set):
+    """
+    Crops the overflow and underflow of the inference set using the dates present in the nested list
+    :param start_date: The start date used to remove earlier inferences
+    :param end_date: The end date used to remove later inferences
+    :param inference_set: The set of inferences
+    :return: The cropped inference set
+    """
     start_index = 0
     end_index = 0
 
