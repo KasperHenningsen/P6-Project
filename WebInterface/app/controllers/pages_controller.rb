@@ -10,7 +10,7 @@ class PagesController < ApplicationController
     client = Async::HTTP::Internet.new
     tasks = get_model_data_async(setting)
 
-    render 'pages/spinner'
+    render 'pages/graph'
   end
 
   private

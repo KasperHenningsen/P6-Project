@@ -1,4 +1,26 @@
 <div class="container">
-  <h4>This is a beautiful graph, with lots of ASS:</h4>
-  <%= render 'pages/spinner' %>
+  <h4>This is a beautiful graph</h4>
+  <div>
+    <canvas id="myChart"></canvas>
+  </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    new Chart(document.getElementById('myChart'), {
+        type: "line",
+        data: {
+            labels: <%= @labels %>,
+            datasets: [
+                {
+                  label: '# of Votes',
+                  data: <%= @data %>
+                }
+            ]
+        },
+        options: {
+            scales: { }
+        }
+    })
+</script>

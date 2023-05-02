@@ -41,7 +41,7 @@ class SettingsController < ApplicationController
   end
 
   def get_horizons
-    return [12, 16, 24]
+    return [12, 24, 48]
   end
 
   def get_date_range
