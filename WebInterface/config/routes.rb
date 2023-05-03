@@ -3,10 +3,10 @@ require 'sidekiq/web'
 Rails.application.routes.draw do
   devise_for :users
   resources :settings
-  
+
   # Require User account to access:
   authenticate :user do
-    root 'pages#home'
+    root 'user#show'
 
     # Pages
     get 'loading', to: 'pages#spinner'

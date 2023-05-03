@@ -1,5 +1,13 @@
 # README
 
+## Deployment
+
+Local deployment of the rails application can be done by using the
+command ```rails s``` in the ``/WebInterface`` directory.
+Optionally the parameter ``-p [PORT]`` can be used to specify
+the port and ``-e [ENVIRONMENT]`` can be used to specify the runtime environment.
+Other arguments can be found [here](https://guides.rubyonrails.org/command_line.html#bin-rails-server)
+
 ## Devise
 
 [Devise](https://github.com/heartcombo/devise) is a authentication solution for Rails.
