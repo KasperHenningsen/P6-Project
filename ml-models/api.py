@@ -16,7 +16,7 @@ from baselines.tcn import TCN
 from baselines.transformer import Transformer
 from mtgnn.mtgnn import MTGNN
 
-import datetime
+from datetime import datetime, timedelta
 import json
 import os
 
@@ -175,15 +175,17 @@ def verify_date_params(args):
     :param args: A dict of arguments given in the url
     :return: An array of the verified arguments, where [0] is the input/output horizon and [1] and [2] are the start and end dates respectively.
     """
-    start_date = args.get('start_date', type=datetime.datetime.fromisoformat)
-    end_date = args.get('end_date', type=datetime.datetime.fromisoformat)
+    start_date = args.get('start_date', type=datetime.fromisoformat)
+    end_date = args.get('end_date', type=datetime.fromisoformat)
 
-    if not (isinstance(start_date, datetime.datetime)):
+    if not (isinstance(start_date, datetime)):
         raise werkzeug.exceptions.BadRequest('Wrong format: start_date\n'
-                                             'A valid format is e.g. 2000-1-1 00:00:00')
-    elif not (isinstance(end_date, datetime.datetime)):
+                                             'A valid format is e.g. 2000-01-01 00:00:00\n'
+                                             'Might be missing leading zeros for the date')
+    elif not (isinstance(end_date, datetime)):
         raise werkzeug.exceptions.BadRequest('Wrong format: end_date\n'
-                                             'A valid format is e.g. 2000-1-1 00:00:00')
+                                             'A valid format is e.g. 2000-01-01 00:00:00\n'
+                                             'Might be missing leading zeros for the date')
 
     return start_date, end_date
 
@@ -290,8 +292,7 @@ def get_model_object(model, horizon):
 
             model_obj = Transformer(input_size, d_model, nhead, num_layers, output_size, dropout)
 
-    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'),
-                            map_location=settings.device)
+    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'), map_location=settings.device)
     model_obj.load_state_dict(state_dict)
     model_obj.eval()
 
@@ -307,13 +308,11 @@ def get_inference_data(model, horizon, start_date, end_date):
     :param end_date: The end date of the inferrence
     :return: The final result of the inferrence
     """
-    timedelta = datetime.timedelta(hours=horizon)
-
     min_index = data.index.min()
-    min_inference = min_index + timedelta
+    min_inference = min_index + timedelta(hours=horizon)
 
     max_index = data.index.max()
-    max_inference = max_index - timedelta
+    max_inference = max_index - timedelta(hours=horizon)
 
     result = []
 
@@ -339,7 +338,6 @@ def infer_start(model, horizon):
     :return: The horizon preceding the dataset and the first horizon's worth of inference
     """
     result = []
-    one_hour = datetime.timedelta(hours=1)
     X_scaler, y_scaler = get_scalers(horizon)
 
     for x in range(2, 0, -1):
@@ -348,10 +346,10 @@ def infer_start(model, horizon):
 
         inference_set = infer(model, horizon, input_data, X_scaler, y_scaler)
 
-        inference_start_date = data.index[horizon * (x - 1)] - one_hour
+        inference_start_date = data.index[horizon * (x - 1)] - timedelta(hours=1)
 
         for y in range(0, horizon):
-            inference = [inference_set[(horizon - 1) - y], inference_start_date - (one_hour * y)]
+            inference = [inference_set[(horizon - 1) - y], inference_start_date - (timedelta(hours=1) * y)]
             result.append(inference)
 
     result.reverse()
@@ -374,31 +372,26 @@ def infer_range(model, horizon, start_date, end_date, result=None):
 
     X_scaler, y_scaler = get_scalers(horizon)
 
-    one_hour = datetime.timedelta(hours=1)
-    time_horizon = datetime.timedelta(hours=horizon)
-
-    current_date = start_date
-    current_index = start_date - time_horizon
+    current_index = start_date - timedelta(hours=horizon)
 
     while current_index < end_date and current_index <= pd.to_datetime(data.index.max()):
-        end_index = current_index + time_horizon
+        end_index = current_index + timedelta(hours=horizon)
 
         if end_index <= data.index.max():
             input_data = data[current_index:end_index]
 
             inference_set = infer(model, horizon, input_data, X_scaler, y_scaler)
         else:
-            input_data = data[data.index.max() - time_horizon:data.index.max()]
+            input_data = data[data.index.max() - timedelta(hours=horizon):data.index.max()]
 
             inference_set = infer(model, horizon, input_data, X_scaler, y_scaler)
             inference_set = inference_set[-(horizon - end_index.hour):]
 
         for y in range(0, len(inference_set)):
-            inference = [inference_set[y], current_index + time_horizon + (one_hour * y)]
+            inference = [inference_set[y], current_index + timedelta(hours=horizon) + (timedelta(hours=1) * y)]
             result.append(inference)
 
-        current_date += time_horizon
-        current_index += time_horizon
+        current_index += timedelta(hours=horizon)
 
     return result
 
@@ -415,7 +408,7 @@ def infer(model, horizon, input_data, X_scaler, y_scaler):
     Infers temp values based on given model, horizon and input data
     :return: A scaled list of inferences
     """
-    input_data = X_scaler.transform(input_data)
+    input_data = X_scaler.transform(input_data.values)
 
     data_tensor = torch.from_numpy(input_data)[:horizon]
     data_tensor = data_tensor.reshape(1, horizon, 32).to(settings.device)
@@ -437,10 +430,10 @@ def crop_result(start_date, end_date, inference_set):
     start_index = 0
     end_index = 0
 
-    for i, inference_res in enumerate(inference_set):
-        if start_date in inference_res:
+    for i, inference in enumerate(inference_set):
+        if start_date in inference:
             start_index = i
-        elif end_date in inference_res:
+        elif end_date in inference:
             end_index = i
 
     result = inference_set[start_index:end_index + 1]
