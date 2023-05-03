@@ -49,6 +49,21 @@ def get_dataset():
     return make_response(response)
 
 
+@app.route('/dataset/actuals')
+def get_dataset_actuals():
+    """
+    :return: A list of dates and temperatures for the given period
+    """
+    start_date = request.args.get('start_date', type=to_datetime)
+    end_date = request.args.get('end_date', type=to_datetime)
+    result = {
+        'temps': data['temp'][start_date:end_date].values.tolist(),
+        'dates': [date.isoformat() for date in data[start_date:end_date].index]
+    }
+    return make_response(result)
+
+
+
 @app.route('/dataset/dates')
 def get_dates():
     """
@@ -141,7 +156,6 @@ def get_transformer():
 def get_mtgnn():
     params = verify_params(request.args)
 
-
     mtgnn = get_model_object('mtgnn', params[0])
     response = get_inference_data(mtgnn, params[0], params[1], params[2])
 
@@ -155,8 +169,8 @@ def verify_params(args):
     :return: An array of the verified arguments, where [0] is the input/output horizon and [1] and [2] are the start and end dates respectively.
     """
     horizon = args.get('horizon', type=int)
-    start_date = args.get('start_date', type=datetime.datetime.fromisoformat)
-    end_date = args.get('end_date', type=datetime.datetime.fromisoformat)
+    start_date = args.get('start_date', type=to_datetime)
+    end_date = args.get('end_date', type=to_datetime)
 
     valid_horizons = [12, 24, 36]
     if horizon not in valid_horizons:
@@ -167,6 +181,10 @@ def verify_params(args):
         raise werkzeug.exceptions.BadRequest('Wrong format: end_date\nA valid format is e.g. 2000-1-1 00:00:00')
 
     return [horizon, start_date, end_date]
+
+
+def to_datetime(dt: str) -> datetime.datetime:
+    return datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S%z").replace(tzinfo=None)
 
 
 @app.errorhandler(werkzeug.exceptions.BadRequest)
@@ -284,7 +302,10 @@ def get_inference_data(model, horizon, start_date, end_date):
         result = inference(model, horizon, start_date, end_date)
 
     result = crop_result(start_date, end_date, result)
-
+    result = {
+        'temps': [result[i][0] for i in range(len(result))],
+        'dates': [result[i][1].isoformat() for i in range(len(result))]
+    }
     return result
 
 
@@ -306,7 +327,7 @@ def initialize_inference(model, horizon):
         data_tensor = torch.from_numpy(input_data.to_numpy())[:horizon]
         data_tensor = data_tensor.reshape(1, horizon, 32)
 
-        result = model(data_tensor.to(settings.device)).detach().flatten().tolist()
+        result = model(data_tensor.to(settings.device)).cpu().detach().flatten().tolist()
 
         inference_start_date = data.index[horizon * (x - 1)] - one_hour
 
@@ -347,7 +368,7 @@ def inference(model, horizon, start_date, end_date, inference_set=None):
         data_tensor = torch.from_numpy(input_data)[:horizon]
         data_tensor = data_tensor.reshape(1, horizon, 32)
 
-        result = model(data_tensor.to(settings.device)).detach()
+        result = model(data_tensor.to(settings.device)).cpu().detach()
         result = y_scaler.inverse_transform(result).flatten()
 
         for y in range(0, horizon):

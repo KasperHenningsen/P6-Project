@@ -1,26 +1,31 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <div class="container">
   <h4>This is a beautiful graph</h4>
   <div>
-    <canvas id="myChart"></canvas>
+    <canvas id="chart"></canvas>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-    new Chart(document.getElementById('myChart'), {
-        type: "line",
-        data: {
-            labels: <%= @labels %>,
-            datasets: [
-                {
-                  label: '# of Votes',
-                  data: <%= @data %>
-                }
-            ]
-        },
-        options: {
-            scales: { }
-        }
-    })
+  var dates = <%= @dataset.dates.to_json.html_safe %>;
+  var temps = <%= @dataset.temps %>;
+  var actualTemps = <%= @actuals.temps %>;
+
+  new Chart(document.getElementById('chart'), {
+      type: "line",
+      data: {
+          labels: dates,
+          datasets: [
+              {
+                label: 'CNN',
+                data: temps
+              },
+              {
+                  label: 'Actual',
+                  data: actualTemps
+              }
+          ]
+      }
+  });
 </script>

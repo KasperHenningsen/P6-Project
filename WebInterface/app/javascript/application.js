@@ -5,4 +5,3 @@ import '@popperjs/core'
 import "bootstrap"
 import "jquery"
 import "controllers"
-import "Chart.min"
