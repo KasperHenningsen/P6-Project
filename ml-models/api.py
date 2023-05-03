@@ -22,10 +22,8 @@ import os
 
 app = Flask(__name__)
 
-featurematrix = f"{settings.scripts_path}\\correlation_coefficient_matrix.csv"
-data = get_processed_data(f"{settings.data_path}\\open-weather-aalborg-2000-2022.csv")
-X_scaler = joblib.load('./saved-models/X_scaler.gz')
-y_scaler = joblib.load('./saved-models/y_scaler.gz')
+featurematrix = os.path.join(settings.scripts_path, 'correlation_coefficient_matrix.csv')
+data = get_processed_data(os.path.join(settings.data_path, 'open-weather-aalborg-2000-2022.csv'))
 
 
 @app.route('/featurematrix')
@@ -78,95 +76,95 @@ def get_models():
     """
     :return: A list of model folders in the settings.models_path directory
     """
-    models = [f for f in os.listdir(settings.models_path) if f not in {'X_scaler.gz', 'y_scaler.gz'}]
+    models = [f for f in os.listdir(settings.models_path)]
 
     return make_response(models)
 
 
 @app.route('/predictions/models/cnn')
 def get_cnn():
-    date_params = verify_date_params(request.args)
+    start_date, end_date = verify_date_params(request.args)
     horizon = verify_horizon_param(request.args)
 
     cnn = get_model_object('cnn', horizon)
-    response = get_inference_data(cnn, horizon, date_params[0], date_params[1])
+    response = get_inference_data(cnn, horizon, start_date, end_date)
 
     return make_response(response)
 
 
 @app.route('/predictions/models/mlp')
 def get_mlp():
-    date_params = verify_date_params(request.args)
+    start_date, end_date = verify_date_params(request.args)
     horizon = verify_horizon_param(request.args)
 
     mlp = get_model_object('mlp', horizon)
-    response = get_inference_data(mlp, horizon, date_params[0], date_params[1])
+    response = get_inference_data(mlp, horizon, start_date, end_date)
 
     return make_response(response)
 
 
 @app.route('/predictions/models/gru')
 def get_gru():
-    date_params = verify_date_params(request.args)
+    start_date, end_date = verify_date_params(request.args)
     horizon = verify_horizon_param(request.args)
 
     gru = get_model_object('gru', horizon)
-    response = get_inference_data(gru, horizon, date_params[0], date_params[1])
+    response = get_inference_data(gru, horizon, start_date, end_date)
 
     return make_response(response)
 
 
 @app.route('/predictions/models/rnn')
 def get_rnn():
-    date_params = verify_date_params(request.args)
+    start_date, end_date = verify_date_params(request.args)
     horizon = verify_horizon_param(request.args)
 
     rnn = get_model_object('rnn', horizon)
-    response = get_inference_data(rnn, horizon, date_params[0], date_params[1])
+    response = get_inference_data(rnn, horizon, start_date, end_date)
 
     return make_response(response)
 
 
 @app.route('/predictions/models/lstm')
 def get_lstm():
-    date_params = verify_date_params(request.args)
+    start_date, end_date = verify_date_params(request.args)
     horizon = verify_horizon_param(request.args)
 
     lstm = get_model_object('lstm', horizon)
-    response = get_inference_data(lstm, horizon, date_params[0], date_params[1])
+    response = get_inference_data(lstm, horizon, start_date, end_date)
 
     return make_response(response)
 
 
 @app.route('/predictions/models/tcn')
 def get_tcn():
-    date_params = verify_date_params(request.args)
+    start_date, end_date = verify_date_params(request.args)
     horizon = verify_horizon_param(request.args)
 
     tcn = get_model_object('tcn', horizon)
-    response = get_inference_data(tcn, horizon, date_params[0], date_params[1])
+    response = get_inference_data(tcn, horizon, start_date, end_date)
 
     return make_response(response)
 
 
 @app.route('/predictions/models/transformer')
 def get_transformer():
-    date_params = verify_date_params(request.args)
+    start_date, end_date = verify_date_params(request.args)
     horizon = verify_horizon_param(request.args)
 
     transformer = get_model_object('transformer', horizon)
-    response = get_inference_data(transformer, horizon, date_params[0], date_params[1])
+    response = get_inference_data(transformer, horizon, start_date, end_date)
 
     return make_response(response)
 
 
 @app.route('/predictions/models/mtgnn')
 def get_mtgnn():
-    date_params = verify_date_params(request.args)
+    start_date, end_date = verify_date_params(request.args)
     horizon = verify_horizon_param(request.args)
 
     mtgnn = get_model_object('mtgnn', horizon)
-    response = get_inference_data(mtgnn, horizon, date_params[0], date_params[1])
+    response = get_inference_data(mtgnn, horizon, start_date, end_date)
 
     return make_response(response)
 
@@ -181,11 +179,13 @@ def verify_date_params(args):
     end_date = args.get('end_date', type=datetime.datetime.fromisoformat)
 
     if not (isinstance(start_date, datetime.datetime)):
-        raise werkzeug.exceptions.BadRequest('Wrong format: start_date\nA valid format is e.g. 2000-1-1 00:00:00')
+        raise werkzeug.exceptions.BadRequest('Wrong format: start_date\n'
+                                             'A valid format is e.g. 2000-1-1 00:00:00')
     elif not (isinstance(end_date, datetime.datetime)):
-        raise werkzeug.exceptions.BadRequest('Wrong format: end_date\nA valid format is e.g. 2000-1-1 00:00:00')
+        raise werkzeug.exceptions.BadRequest('Wrong format: end_date\n'
+                                             'A valid format is e.g. 2000-1-1 00:00:00')
 
-    return [start_date, end_date]
+    return start_date, end_date
 
 
 def verify_horizon_param(args):
@@ -196,9 +196,10 @@ def verify_horizon_param(args):
     """
     horizon = args.get('horizon', type=int)
 
-    valid_horizons = [12, 24, 36]
+    valid_horizons = [12, 24, 48]
     if horizon not in valid_horizons:
-        raise werkzeug.exceptions.BadRequest(f'Invalid horizon: {horizon}\nValid horizons include {valid_horizons}')
+        raise werkzeug.exceptions.BadRequest(f'Invalid horizon: {horizon}\n'
+                                             f'Valid horizons include {valid_horizons}')
 
     return horizon
 
@@ -339,12 +340,13 @@ def infer_start(model, horizon):
     """
     result = []
     one_hour = datetime.timedelta(hours=1)
+    X_scaler, y_scaler = get_scalers(horizon)
 
     for x in range(2, 0, -1):
         input_data = data[horizon * (x - 1):horizon * x]
         input_data = input_data[::-1]
 
-        inference_set = infer(model, horizon, input_data)
+        inference_set = infer(model, horizon, input_data, X_scaler, y_scaler)
 
         inference_start_date = data.index[horizon * (x - 1)] - one_hour
 
@@ -370,6 +372,8 @@ def infer_range(model, horizon, start_date, end_date, result=None):
     if result is None:
         result = []
 
+    X_scaler, y_scaler = get_scalers(horizon)
+
     one_hour = datetime.timedelta(hours=1)
     time_horizon = datetime.timedelta(hours=horizon)
 
@@ -382,11 +386,11 @@ def infer_range(model, horizon, start_date, end_date, result=None):
         if end_index <= data.index.max():
             input_data = data[current_index:end_index]
 
-            inference_set = infer(model, horizon, input_data)
+            inference_set = infer(model, horizon, input_data, X_scaler, y_scaler)
         else:
             input_data = data[data.index.max() - time_horizon:data.index.max()]
 
-            inference_set = infer(model, horizon, input_data)
+            inference_set = infer(model, horizon, input_data, X_scaler, y_scaler)
             inference_set = inference_set[-(horizon - end_index.hour):]
 
         for y in range(0, len(inference_set)):
@@ -399,12 +403,16 @@ def infer_range(model, horizon, start_date, end_date, result=None):
     return result
 
 
-def infer(model, horizon, input_data):
+def get_scalers(horizon):
+    X_scaler = joblib.load(os.path.join(settings.scalers_path, f'horizon_{horizon}', 'X_scaler.gz'))
+    y_scaler = joblib.load(os.path.join(settings.scalers_path, f'horizon_{horizon}', 'y_scaler.gz'))
+
+    return X_scaler, y_scaler
+
+
+def infer(model, horizon, input_data, X_scaler, y_scaler):
     """
     Infers temp values based on given model, horizon and input data
-    :param model: The model used in the inference
-    :param horizon: The input/output horizon
-    :param input_data: The data to infer from
     :return: A scaled list of inferences
     """
     input_data = X_scaler.transform(input_data)
