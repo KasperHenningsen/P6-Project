@@ -10,7 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_23_161841) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_03_093029) do
+  create_table "predictions", force: :cascade do |t|
+    t.integer "setting_id", null: false
+    t.float "temp"
+    t.datetime "date"
+    t.index ["setting_id"], name: "index_predictions_on_setting_id"
+  end
+
   create_table "settings", force: :cascade do |t|
     t.datetime "start_date", null: false
     t.datetime "end_date", null: false
@@ -18,6 +25,24 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_23_161841) do
     t.string "models", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_settings_on_user_id"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "admin"
+    t.string "username"
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
+  add_foreign_key "predictions", "settings"
+  add_foreign_key "settings", "users"
 end

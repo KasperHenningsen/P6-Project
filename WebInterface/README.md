@@ -1,24 +1,17 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Devise
 
-Things you may want to cover:
+[Devise](https://github.com/heartcombo/devise) is a authentication solution for Rails.
 
-* Ruby version
+## Sidekiq
 
-* System dependencies
+[Sidekiq](https://github.com/sidekiq/sidekiq) is used as a job scheduler and can be deployed by running
+the following command inside /WebInterface:
 
-* Configuration
+``bundle exec sidekiq -C config/sidekiq.yml``
 
-* Database creation
+The Sidekiq dashboard can be accessed by:
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+* Logging in as a admin user and pressing the "Monitor jobs" button, in the navbar dropdown.
+* Accessing [``/sidekiq``](http://localhost:3000/sidekiq) and then logging in.

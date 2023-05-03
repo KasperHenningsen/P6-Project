@@ -1,6 +1,18 @@
 class SettingsController < ApplicationController
 
-  # GET /settings/new
+  # Setting
+  # - PK
+  # - StartDate (datetime)
+  # - EndDate (datetime)
+  # - Horizon (integer)
+  # - Model (string)
+
+  # Prediction
+  # - FK ( Ref. Setting)
+  # - PK
+  # - Temp (float)
+  # - Date (datetime)
+
   def new
     @dates = get_date_range
     @data_methods = get_data_methods
@@ -15,21 +27,35 @@ class SettingsController < ApplicationController
     @setting = Setting.new(setting_params)
 
     if @setting.save!
-      redirect_to graph_path(id: @setting.id)
+      redirect_to profile_path(id: current_user.id)
     else
       @dates = get_date_range
       @horizons = get_horizons
       @models = get_nn_models
-      flash.now[:error] = "There was an error saving the setting."
+      flash[:error] = "There was an error saving the setting."
 
       render 'new'
     end
   end
 
+  def delete
+    setting = Setting.find(params[:id])
+
+    if current_user.id == setting.user_id
+      begin
+        setting.destroy!
+        flash[:error] = "Setting removed!}"
+      rescue => e
+        flash[:error] = "Setting could not be removed! Error: #{e.message}"
+      end
+    end
+
+  end
+
   private
 
   def setting_params
-    params.require(:setting).permit(:start_date, :end_date, :horizon, models: [])
+    params.require(:setting).permit(:user_id, :start_date, :end_date, :horizon, models: [])
   end
 
   def get_data_methods
@@ -45,6 +71,6 @@ class SettingsController < ApplicationController
   end
 
   def get_date_range
-    return ["2000-01-01T00:00:00Z", "2022-01-01T00:00:00Z"]
+    return %w[2000-01-01T00:00:00Z, 2022-01-01T00:00:00Z]
   end
 end

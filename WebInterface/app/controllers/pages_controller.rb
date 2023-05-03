@@ -5,55 +5,44 @@ class PagesController < ApplicationController
   def home
   end
 
-  def graph
+  def spinner
     setting = Setting.find(params[:id])
-    client = Async::HTTP::Internet.new
-    tasks = get_model_data_async(setting)
+    $tasks = setting.models.split(',').map do |model|
+      ModelPredictionJob.perform_later(model, setting.horizon, setting.start_date, setting.end_date)
+    end
 
-    render 'pages/spinner'
+    redirect_to graph_path
+  end
+
+  def graph
+    Async do
+      $tasks.each do |task|
+        response = task&.wait&.result
+        puts "RESPONSE: #{response}"
+
+        if response.nil?
+          flash[:error] = "An error occurred while contacting the Models API!"
+          redirect_to root_path and return
+        else
+          @responses << response
+        end
+      end
+      render :graph
+    end
   end
 
   private
 
-  Async def get_model_data_async(setting)
-    base_url = ENV['MODEL_API_URL']
+  Async def get_model_predictions_async(setting)
     models = setting.models.split(",")
     start_date = setting.start_date.strftime('%Y-%m-%dT%H:%M:%S.%L%z')
     end_date = setting.end_date.strftime('%Y-%m-%dT%H:%M:%S.%L%z')
     tasks = []
 
-    Async do
-      client = Async::HTTP::Internet.new
-
-      models.each do |model|
-        url = URI("#{base_url}#{model}?horizon=#{setting.horizon}&start_date=#{start_date}&end_date=#{end_date}")
-        task = client.async.get(url).then(&:read)
-        tasks << task
-      end
-
-      client&.close
+    models.each do |model|
+      tasks << ModelPredictionJob.perform_later(model, setting.horizon, start_date, end_date)
     end
 
-    return tasks
-  end
-
-  def some
-    responses = []
-    Async::Task::WaitAll(*tasks)
-
-    tasks.each do |task|
-      response = task.result
-      if response.status == 200
-        responses << response.read
-      else
-        return nil
-      end
-    end
-
-    client.close
-  end
-
-  def some_other
-    client = Async::HTTP::Internet.new
+    tasks
   end
 end
