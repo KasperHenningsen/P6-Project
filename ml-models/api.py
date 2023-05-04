@@ -40,9 +40,9 @@ def get_data_full():
     :return: A list of datetime/temp tuples over the entire dataset
     """
     dates = np.ndarray.tolist(data.index.to_pydatetime())
-    temp = np.ndarray.tolist(data["temp"].values)
+    temps = np.ndarray.tolist(data["temp"].values)
 
-    response = list(zip(temp, dates))
+    response = list(zip(temps, dates))
 
     return make_response(response)
 
@@ -52,13 +52,13 @@ def get_data_subset():
     """
     :return: A subset list of the datetime/temp tuples over a date range
     """
-    date_params = verify_date_params(request.args)
+    start_date, end_date = verify_date_params(request.args)
 
-    data_subset = data[date_params[0]:date_params[1]]
+    data_subset = data[start_date:end_date]
     dates = np.ndarray.tolist(data_subset.index.to_pydatetime())
-    temp = np.ndarray.tolist(data_subset["temp"].values)
+    temps = np.ndarray.tolist(data_subset["temp"].values)
 
-    response = list(zip(temp, dates))
+    response = list(zip(temps, dates))
 
     return make_response(response)
 
