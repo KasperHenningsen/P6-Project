@@ -8,24 +8,16 @@
 </div>
 
 <script>
-  var dates = <%= @dataset.dates.to_json.html_safe %>;
-  var temps = <%= @dataset.temps %>;
-  var actualTemps = <%= @actuals.temps %>;
+  <% if @datasets and @dates %>
+  var datasets = <%= @datasets.map { |d| { label: d.identifier, data: d.temps } }.to_json.html_safe %>
+  var dates = <%= @dates.to_json.html_safe %>;
 
   new Chart(document.getElementById('chart'), {
       type: "line",
       data: {
           labels: dates,
-          datasets: [
-              {
-                label: 'CNN',
-                data: temps
-              },
-              {
-                  label: 'Actual',
-                  data: actualTemps
-              }
-          ]
+          datasets: datasets
       }
   });
+  <% end %>
 </script>

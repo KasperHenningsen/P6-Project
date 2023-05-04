@@ -37,7 +37,7 @@ class SettingsController < ApplicationController
   end
 
   def get_nn_models
-    return %w[mlp rnn gru lstm mtgnn]
+    return %w[MLP RNN LSTM GRU CNN TCN Transformer MTGNN]
   end
 
   def get_horizons

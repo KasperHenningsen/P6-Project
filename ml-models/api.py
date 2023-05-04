@@ -198,15 +198,15 @@ def get_model_object(model, horizon):
         model_json = json.load(open(f'{settings.models_path}\\MTGNN\\horizon_{horizon}\\log.json'))
         model_params = model_json['model_parameters']
 
-        num_features = model_params['model_parameters']['num_features']
-        seq_length = model_params['model_parameters']['seq_length']
-        num_layers = model_params['model_parameters']['num_layers']
-        subgraph_size = model_params['model_parameters']['subgraph_size']
-        subgraph_node_dim = model_params['model_parameters']['subgraph_node_dim']
-        use_output_convolution = model_params['model_parameters']['use_output_convolution']
-        dropout = model_params['model_parameters']['dropout']
+        num_features = model_params['num_features']
+        seq_length = model_params['seq_length']
+        num_layers = model_params['num_layers']
+        # subgraph_size = model_params['subgraph_size']
+        # subgraph_node_dim = model_params['subgraph_node_dim']
+        use_output_convolution = model_params['use_output_convolution']
+        dropout = model_params['dropout']
 
-        model_obj = MTGNN(num_features, seq_length, num_layers, subgraph_size, subgraph_node_dim, use_output_convolution, dropout)
+        model_obj = MTGNN(num_features, seq_length, num_layers, use_output_convolution, dropout)
     else:
         model_json = json.load(open(f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}\\log.json'))
         model_params = model_json['model_parameters']
