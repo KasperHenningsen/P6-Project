@@ -11,6 +11,9 @@
 /db/*.sqlite3
 /db/*.sqlite3-*
 
+# Ignore Seed file
+/db/seeds.rb
+
 # Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*
