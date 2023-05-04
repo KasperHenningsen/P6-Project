@@ -1,13 +1,29 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
-  get 'graph/index'
+  devise_for :users
   resources :settings
 
-  root 'pages#home'
+  # Require User account to access:
+  authenticate :user do
+    root 'user#show'
 
-  # Pages
-  get 'graph', to: 'graph#show'
-  resources :settings
+    # Pages
+    get 'loading', to: 'pages#spinner'
+    get 'graph', to: 'graph#show'
 
-  # Feature Matrix
-  get 'featurematrix', to: 'feature_matrix#index'
+    # User
+    get 'profile', to: 'user#show'
+
+    # Setting
+    delete 'setting', to: 'settings#delete'
+
+    # Feature Matrix
+    get 'featurematrix', to: 'feature_matrix#index'
+  end
+
+  # Only admin can access these sites:
+  authenticate :user, lambda { |u| u.admin? } do
+    mount Sidekiq::Web => '/sidekiq'
+  end
 end

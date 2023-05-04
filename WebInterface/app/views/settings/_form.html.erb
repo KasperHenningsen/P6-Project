@@ -2,6 +2,8 @@
   <%= form_with model: setting do |form| %>
 
     <div>
+      <%= form.hidden_field :user_id, value: current_user.id %>
+      
       <div class="input-group mb-3">
         <%= form.label :start_date, class: 'input-group-text', for: 'setting_start_date', style: 'min-width: 100px' %>
         <%= form.datetime_field :start_date, { class: "form-control flatpickr-date-field", placeholder: 'DD-MM-YYYY HH:mm', required: true } %>
