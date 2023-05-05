@@ -7,7 +7,7 @@ class GraphController < ApplicationController
     end_date_iso = setting.end_date.iso8601
 
     actuals = ActualValuesJob.perform_async(start_date_iso, end_date_iso)
-    unless actuals == nil
+    unless actuals.nil?
       @dates = actuals.dates
       @datasets = [actuals]
       setting.models.split(',').each do |model|
