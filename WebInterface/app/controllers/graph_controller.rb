@@ -3,12 +3,15 @@ require('net/http')
 class GraphController < ApplicationController
   def show
     setting = Setting.find(params[:id])
-    actuals = get_actuals(setting.start_date, setting.end_date)
+    start_date_iso = setting.start_date.iso8601
+    end_date_iso = setting.end_date.iso8601
+
+    actuals = ActualValuesJob.perform_async(start_date_iso, end_date_iso)
     unless actuals == nil
       @dates = actuals.dates
       @datasets = [actuals]
       setting.models.split(',').each do |model|
-        pred = get_predictions(model, setting.horizon, setting.start_date, setting.end_date)
+        pred = ModelPredictionJob.perform_sync(model, setting.horizon, start_date_iso, end_date_iso)
         unless pred == nil
           @datasets.append(pred)
         end
@@ -51,7 +54,7 @@ class GraphController < ApplicationController
         return Dataset.new(
           identifier: 'Unnamed',
           dates: data['dates'].map { |d| DateTime.parse(d).to_fs(:short) if d },
-          temps: data['temps'].map { |t| t.to_f.round(1) if t }
+          temps: data['temps'].map { |t| t.to_f.round(2) if t }
         )
       else
         config.logger.warn("retrieved non-OK status from API: #{res.code}")
