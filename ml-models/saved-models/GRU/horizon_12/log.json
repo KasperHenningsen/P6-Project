@@ -1,0 +1,34 @@
+{
+  "model": "GRU",
+  "trained_at": "2023-04-22T12:26:58.506729",
+  "train_time_seconds": 1275,
+  "loss": {
+    "validation": {
+      "mae": 1.4023975102708441,
+      "smape": 0.30540047563183653,
+      "rmse": 1.7126414581107394
+    },
+    "test": {
+      "mae": 1.4824422010507619,
+      "smape": 0.28159150878588357,
+      "rmse": 1.9174945930331164
+    }
+  },
+  "hyperparameters": {
+    "seq_len": 12,
+    "target_len": 12,
+    "target_col": "temp",
+    "batch_size": 32,
+    "epochs": 15,
+    "learning_rate": 0.0001,
+    "train_size": 0.6,
+    "grad_clipping": null
+  },
+  "model_parameters": {
+    "input_size": 32,
+    "hidden_size": 256,
+    "output_size": 1,
+    "num_layers": 3,
+    "dropout": 0.2
+  }
+}
