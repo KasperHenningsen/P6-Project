@@ -1,0 +1,35 @@
+{
+  "model": "TCN",
+  "trained_at": "2023-05-03T02:15:05.153105",
+  "train_time_seconds": 11065,
+  "loss": {
+    "validation": {
+      "mae": 1.6243854408103537,
+      "smape": 0.3498275017856454,
+      "rmse": 1.9948929717031645
+    },
+    "test": {
+      "mae": 1.6609436647340692,
+      "smape": 0.30895451290739906,
+      "rmse": 2.1539078502993925
+    }
+  },
+  "hyperparameters": {
+    "seq_len": 48,
+    "target_len": 48,
+    "target_col": "temp",
+    "batch_size": 32,
+    "epochs": 15,
+    "learning_rate": 0.0001,
+    "train_size": 0.6,
+    "grad_clipping": null
+  },
+  "model_parameters": {
+    "input_size": 32,
+    "hidden_size": 48,
+    "output_size": 1,
+    "depth": 4,
+    "kernel_size": 48,
+    "dilation_base": 2
+  }
+}
