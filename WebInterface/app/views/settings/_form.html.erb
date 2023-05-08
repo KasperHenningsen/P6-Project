@@ -23,7 +23,7 @@
         <h5>Select models:</h5>
         <div class="ps-2">
 
-          <%= form.collection_check_boxes :models, @models, :downcase, :upcase, { class: 'form-check-input' } do |cb| %>
+          <%= form.collection_check_boxes :models, @models, :itself, :itself, { class: 'form-check-input' } do |cb| %>
             <div class="form-check">
               <%= cb.check_box %>
               <%= cb.label class: 'form-check-label' %>

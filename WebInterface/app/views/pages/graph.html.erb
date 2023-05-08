@@ -1,0 +1,12 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+S
+<div class="container">
+  <h4>This is a beautiful graph</h4>
+  <div>
+    <canvas id="chart"
+            data-controller="graph"
+            data-graph-dates='<%= @dates.to_json.html_safe %>'
+            data-graph-datasets='<%= @datasets.map { |d| { label: d.identifier, data: d.temps } }.to_json.html_safe %>'
+    ></canvas>
+  </div>
+</div>

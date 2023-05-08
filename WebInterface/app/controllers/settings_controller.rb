@@ -25,11 +25,9 @@ class SettingsController < ApplicationController
   def create
     @data_methods = get_data_methods
     @setting = Setting.new(setting_params)
-    start_date = to_iso(@setting.start_date)
-    end_date = to_iso(@setting.end_date)
 
     if @setting.save!
-      redirect_to profile_path(id: current_user.id)
+      redirect_to graph_path(id: @setting.id)
     else
       @dates = get_date_range
       @horizons = get_horizons
@@ -37,10 +35,6 @@ class SettingsController < ApplicationController
       flash[:error] = "There was an error saving the setting."
 
       render 'new'
-    end
-
-    @setting.models.split(',').map do |model|
-      ModelPredictionJob.perform_async(model, @setting.horizon, start_date, end_date)
     end
   end
 
@@ -50,7 +44,7 @@ class SettingsController < ApplicationController
     if current_user.id == setting.user_id
       begin
         setting.destroy!
-        flash[:error] = "Setting removed!}"
+        flash[:error] = "Setting removed!"
       rescue => e
         flash[:error] = "Setting could not be removed! Error: #{e.message}"
       end
@@ -71,20 +65,16 @@ class SettingsController < ApplicationController
 
   # @todo: move to SidekiqJob
   def get_nn_models
-    return %w[mlp rnn gru lstm mtgnn]
+    return %w[MLP RNN LSTM GRU CNN TCN Transformer MTGNN]
   end
 
   # @todo: move to SidekiqJob
   def get_horizons
-    return [12, 16, 24]
+    return [12, 24, 48]
   end
 
   # @todo: move to SidekiqJob
   def get_date_range
     return %w[2000-01-01T00:00:00Z, 2022-01-01T00:00:00Z]
-  end
-
-  def to_iso(date)
-    date.strftime('%Y-%m-%dT%H:%M:%S.%L%z')
   end
 end

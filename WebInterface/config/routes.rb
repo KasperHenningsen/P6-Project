@@ -10,7 +10,7 @@ Rails.application.routes.draw do
 
     # Pages
     get 'loading', to: 'pages#spinner'
-    get 'graph', to: 'pages#graph'
+    get 'graph', to: 'graph#show'
 
     # User
     get 'profile', to: 'user#show'
