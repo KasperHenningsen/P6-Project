@@ -81,90 +81,14 @@ def get_models():
     return make_response(models)
 
 
-@app.route('/predictions/models/cnn')
-def get_cnn():
+@app.route('/predictions/')
+def get_model():
     start_date, end_date = verify_date_params(request.args)
     horizon = verify_horizon_param(request.args)
+    model = request.args.get('model')
 
-    cnn = get_model_object('cnn', horizon)
-    response = get_inference_data(cnn, horizon, start_date, end_date)
-
-    return make_response(response)
-
-
-@app.route('/predictions/models/mlp')
-def get_mlp():
-    start_date, end_date = verify_date_params(request.args)
-    horizon = verify_horizon_param(request.args)
-
-    mlp = get_model_object('mlp', horizon)
-    response = get_inference_data(mlp, horizon, start_date, end_date)
-
-    return make_response(response)
-
-
-@app.route('/predictions/models/gru')
-def get_gru():
-    start_date, end_date = verify_date_params(request.args)
-    horizon = verify_horizon_param(request.args)
-
-    gru = get_model_object('gru', horizon)
-    response = get_inference_data(gru, horizon, start_date, end_date)
-
-    return make_response(response)
-
-
-@app.route('/predictions/models/rnn')
-def get_rnn():
-    start_date, end_date = verify_date_params(request.args)
-    horizon = verify_horizon_param(request.args)
-
-    rnn = get_model_object('rnn', horizon)
-    response = get_inference_data(rnn, horizon, start_date, end_date)
-
-    return make_response(response)
-
-
-@app.route('/predictions/models/lstm')
-def get_lstm():
-    start_date, end_date = verify_date_params(request.args)
-    horizon = verify_horizon_param(request.args)
-
-    lstm = get_model_object('lstm', horizon)
-    response = get_inference_data(lstm, horizon, start_date, end_date)
-
-    return make_response(response)
-
-
-@app.route('/predictions/models/tcn')
-def get_tcn():
-    start_date, end_date = verify_date_params(request.args)
-    horizon = verify_horizon_param(request.args)
-
-    tcn = get_model_object('tcn', horizon)
-    response = get_inference_data(tcn, horizon, start_date, end_date)
-
-    return make_response(response)
-
-
-@app.route('/predictions/models/transformer')
-def get_transformer():
-    start_date, end_date = verify_date_params(request.args)
-    horizon = verify_horizon_param(request.args)
-
-    transformer = get_model_object('transformer', horizon)
-    response = get_inference_data(transformer, horizon, start_date, end_date)
-
-    return make_response(response)
-
-
-@app.route('/predictions/models/mtgnn')
-def get_mtgnn():
-    start_date, end_date = verify_date_params(request.args)
-    horizon = verify_horizon_param(request.args)
-
-    mtgnn = get_model_object('mtgnn', horizon)
-    response = get_inference_data(mtgnn, horizon, start_date, end_date)
+    model = get_model_object(model, horizon)
+    response = get_inference_data(model, horizon, start_date, end_date)
 
     return make_response(response)
 
