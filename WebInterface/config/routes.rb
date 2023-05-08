@@ -8,8 +8,7 @@ Rails.application.routes.draw do
   authenticate :user do
     root 'user#show'
 
-    # Pages
-    get 'loading', to: 'pages#spinner'
+    # Graph
     get 'graph', to: 'graph#show'
 
     # User

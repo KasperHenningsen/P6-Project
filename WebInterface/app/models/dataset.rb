@@ -1,3 +1,4 @@
 class Dataset < ApplicationRecord
-  attr_accessor(:identifier, :dates, :temps)
+  belongs_to :setting
+  has_many :data_points, dependent: :destroy
 end

@@ -1,0 +1,25 @@
+<div class="mb-2 card">
+  <div class="p-2 card-body">
+    <p class="mb-0 pb-0 card-text">
+      Models: <%= setting.models %> <br>
+      Date range: <%= setting.start_date.strftime("%H:%M %d-%m-%Y") %>
+      to <%= setting.end_date.strftime("%H:%M %d-%m-%Y") %><br>
+      Horizon: <%= setting.horizon %>
+    </p>
+  </div>
+
+  <div class="card-body">
+    <div class="d-flex">
+      <% if setting.has_dataset %>
+        <%= link_to 'Use', graph_path(id: setting.id, dataset_id: setting.datasets_id), class: 'btn btn-success' %>
+      <% else %>
+        <button class="me-1 btn btn-secondary" type="button" disabled>
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Loading dataset
+        </button>
+      <% end %>
+
+      <%= button_to 'Delete', setting_path(id: setting.id), method: :delete, class: 'btn btn-danger' %>
+    </div>
+  </div>
+</div>

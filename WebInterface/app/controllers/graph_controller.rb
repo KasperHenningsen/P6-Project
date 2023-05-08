@@ -1,22 +1,16 @@
-require('net/http')
-
 class GraphController < ApplicationController
   def show
     setting = Setting.find(params[:id])
-    start_date_iso = setting.start_date.iso8601
-    end_date_iso = setting.end_date.iso8601
+    dataset = Dataset.find(params[:dataset_id])
 
-    actuals = ActualValuesJob.perform_async(start_date_iso, end_date_iso)
-    unless actuals.nil?
-      @dates = actuals.dates
-      @datasets = [actuals]
-      setting.models.split(',').each do |model|
-        pred = ModelPredictionJob.perform_sync(model, setting.horizon, start_date_iso, end_date_iso)
-        unless pred.nil?
-          @datasets.append(pred)
-        end
-      end
+    @datasets = DataPoint.order(:date).where(identifier: "Actual", dataset_id: dataset.id)
+    @dates = DataPoint.select(:date).order(:date).where(identifier: "Actual", dataset_id: dataset.id)
+
+    setting.models.split(' ').each do |model|
+      model_data = DataPoint.order(:date).where(identifier: model.strip, dataset_id: dataset.id)
+      @datasets += model_data if model_data.any?
     end
-    render('pages/graph')
+
+    render 'graph/graph'
   end
 end

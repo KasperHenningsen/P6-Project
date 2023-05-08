@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_04_215402) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_05_055810) do
+  create_table "data_points", force: :cascade do |t|
+    t.integer "dataset_id"
+    t.string "identifier"
+    t.datetime "date"
+    t.float "temp"
+    t.index ["dataset_id"], name: "index_data_points_on_dataset_id"
+  end
+
   create_table "datasets", force: :cascade do |t|
+    t.integer "setting_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["setting_id"], name: "index_datasets_on_setting_id"
   end
 
   create_table "predictions", force: :cascade do |t|
@@ -31,6 +41,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_04_215402) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.boolean "has_dataset"
+    t.integer "datasets_id"
+    t.index ["datasets_id"], name: "index_settings_on_datasets_id"
     t.index ["user_id"], name: "index_settings_on_user_id"
   end
 
@@ -49,5 +62,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_04_215402) do
   end
 
   add_foreign_key "predictions", "settings"
+  add_foreign_key "settings", "datasets", column: "datasets_id"
   add_foreign_key "settings", "users"
 end

@@ -13,7 +13,7 @@ User.create!(email: "admin@example.com",
              username: "admin"
 )
 
-User.create!(email: "user@exapmple.com",
+User.create!(email: "user@example.com",
              password: "user1234",
              password_confirmation: "user1234",
              admin: false,

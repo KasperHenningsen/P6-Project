@@ -1,12 +1,12 @@
 class Setting < ApplicationRecord
   before_save :format_data
+  has_many :dataset, dependent: :destroy
 
   validate :validate_datetime_fields
 
   def format_data
-    if self.models.present?
-      self.models = JSON.parse(self.models).reject(&:empty?).join(",")
-    end
+    words = self.models.split(',').map { |word| word.gsub(/[^a-zA-Z ]/, '') }
+    self.models = words.join(' ')
   end
 
   private
