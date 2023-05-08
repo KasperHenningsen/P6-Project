@@ -23,7 +23,7 @@ class ModelPredictionJob
   def send_request(model, horizon, start_date, end_date)
     base_url = ENV["MODEL_API_URL"]
     req_url = URI.parse("#{base_url}/predictions/models/#{model.downcase}?horizon=#{horizon}&start_date=#{start_date}&end_date=#{end_date}")
-    Net::HTTP.get_response(req_url)
+    return Net::HTTP.get_response(req_url)
   end
 
   def format_response(response, model)
