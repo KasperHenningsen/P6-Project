@@ -122,7 +122,7 @@ def verify_horizon_param(args):
     """
     horizon = args.get('horizon', type=int)
 
-    valid_horizons = [12, 24, 48]
+    valid_horizons = [1, 3, 6, 12, 24, 48]
     if horizon not in valid_horizons:
         raise werkzeug.exceptions.BadRequest(f'Invalid horizon: {horizon}\n'
                                              f'Valid horizons include {valid_horizons}')
@@ -272,7 +272,7 @@ def infer_start(model, horizon):
 
         inference_start_date = data.index[horizon * (x - 1)] - timedelta(hours=1)
 
-        for y in range(0, horizon):
+        for y in range(0, horizon):  # Add dates to inferences
             inference = [inference_set[(horizon - 1) - y], inference_start_date - (timedelta(hours=1) * y)]
             result.append(inference)
 
@@ -301,17 +301,17 @@ def infer_range(model, horizon, start_date, end_date, result=None):
     while current_index < end_date and current_index <= pd.to_datetime(data.index.max()):
         end_index = current_index + timedelta(hours=horizon)
 
-        if end_index <= data.index.max():
+        if end_index <= data.index.max():  # No, forecasting
             input_data = data[current_index:end_index]
 
             inference_set = infer(model, horizon, input_data, X_scaler, y_scaler)
-        else:
+        else:  # Forecasting
             input_data = data[data.index.max() - timedelta(hours=horizon):data.index.max()]
 
             inference_set = infer(model, horizon, input_data, X_scaler, y_scaler)
             inference_set = inference_set[-(horizon - end_index.hour):]
 
-        for y in range(0, len(inference_set)):
+        for y in range(0, len(inference_set)):  # Add dates to inferences
             inference = [inference_set[y], current_index + timedelta(hours=horizon) + (timedelta(hours=1) * y)]
             result.append(inference)
 
