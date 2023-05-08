@@ -69,8 +69,8 @@ if __name__ == '__main__':
     y_scaler = StandardScaler().fit(y_train.reshape(-1, y_train.shape[-1]))
 
     # Save scaler for later use
-    joblib.dump(X_scaler, os.path.join(settings.models_path, 'X_scaler.gz'))
-    joblib.dump(y_scaler, os.path.join(settings.models_path, 'y_scaler.gz'))
+    joblib.dump(X_scaler, os.path.join(settings.scalers_path, f'horizon_{seq_length}', 'X_scaler.gz'))
+    joblib.dump(y_scaler, os.path.join(settings.scalers_path, f'horizon_{seq_length}', 'y_scaler.gz'))
 
     train_start_time = time.time()
     total_train_time = None

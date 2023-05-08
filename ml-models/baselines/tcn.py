@@ -74,4 +74,5 @@ class ResidualBlock(nn.Module):
                 out = self.dropout(out)
 
         out += residual
+        out = out.swapdims(1, 2)
         return self.relu(out)
