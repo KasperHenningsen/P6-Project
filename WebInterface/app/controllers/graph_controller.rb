@@ -12,7 +12,7 @@ class GraphController < ApplicationController
       @datasets = [actuals]
       setting.models.split(',').each do |model|
         pred = ModelPredictionJob.perform_sync(model, setting.horizon, start_date_iso, end_date_iso)
-        unless pred == nil
+        unless pred.nil?
           @datasets.append(pred)
         end
       end
