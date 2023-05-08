@@ -144,7 +144,7 @@ class MTGNN(nn.Module):
             # for each time-step we take only the first feature (the target feature)
             out = out[:, :, :1]
 
-        return torch.squeeze(out)  # squeeze to (batch_size, time_steps)
+        return out.reshape(-1, x.shape[1])  # squeeze to (batch_size, time_steps)
 
     def load_saved_model(self):
         state_dict = torch.load(os.path.join(self.path, 'model.pt'))

@@ -1,16 +1,20 @@
 class GraphController < ApplicationController
   def show
-    setting = Setting.find(params[:id])
     dataset = Dataset.find(params[:dataset_id])
 
-    @datasets = DataPoint.order(:date).where(identifier: "Actual", dataset_id: dataset.id)
-    @dates = DataPoint.select(:date).order(:date).where(identifier: "Actual", dataset_id: dataset.id)
+    @datasets = DataPoint.select("identifier, json_group_array(date) AS dates, json_group_array(temp) AS temps")
+                         .where(dataset_id: dataset.id)
+                         .group(:identifier)
+                         .order(:date)
+                         .map { |d| {
+                           identifier: d.identifier,
+                           dates: JSON.parse(d.dates),
+                           temps: JSON.parse(d.temps)
+                         } }
 
-    setting.models.split(' ').each do |model|
-      model_data = DataPoint.order(:date).where(identifier: model.strip, dataset_id: dataset.id)
-      @datasets += model_data if model_data.any?
-    end
-
-    render 'graph/graph'
+    @dates = DataPoint.where(identifier: "Actual", dataset_id: dataset.id)
+                      .order(:date)
+                      .pluck(:date)
+                      .map { |d| d.to_fs(:short) }
   end
 end

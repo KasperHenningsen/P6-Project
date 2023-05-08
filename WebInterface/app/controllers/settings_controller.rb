@@ -14,6 +14,8 @@ class SettingsController < ApplicationController
     start_date = @setting.start_date.iso8601
     end_date = @setting.end_date.iso8601
 
+    @setting.datasets_id = dataset.id
+
     if @setting.save!
       dataset.save!
       redirect_to profile_path
