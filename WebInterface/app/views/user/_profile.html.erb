@@ -1,9 +1,12 @@
 <div class="ms-4 mt-4 d-flex align-items-start">
   <div>
     <h2>Profile</h2>
-    <div>
-      <label class="form-label">Username: <%= current_user.username.titlecase %></label>
-    </div>
+
+    <% if current_user.username.present? %>
+      <div>
+        <label class="form-label">Username: <%= current_user.username.titlecase %></label>
+      </div>
+    <% end %>
 
     <div>
       <label class="form-label">Email: <%= current_user.email %></label>
