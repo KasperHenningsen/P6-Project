@@ -1,0 +1,100 @@
+.matrix-container {
+    display: grid;
+    grid-template-columns: 1fr auto auto 1fr;
+}
+
+.matrix {
+    display: grid;
+    text-align: center;
+    width: 100%;
+}
+
+.matrix-cell {
+    aspect-ratio: 1/1;
+}
+
+.data-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.data-cell.lowlight {
+    opacity: 33%;
+}
+
+.data-cell.border-hor, .label.border-hor, .container-bottom.border-hor {
+    border-top: 1px solid black !important;
+    border-bottom: 1px solid black !important;
+}
+
+.data-cell.border-ver, .label.border-ver, .container-bottom.border-ver {
+    border-left: 1px solid black !important;
+    border-right: 1px solid black !important;
+}
+
+.container-bottom {
+    height: calc(100% + 5px);
+}
+
+.matrix .label {
+    display: flex;
+    padding-right: 5px;
+    font-size: clamp(6px, 1.4vh, 1vw);
+    width: auto;
+    height: auto;
+    align-items: center;
+}
+
+.label.bottom {
+    margin-top: 10px;
+    transform: rotate(90deg);
+}
+
+.matrix-legend {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    height: 92%;
+}
+
+.matrix-legend .bar {
+    width: 10px;
+    height: 100%;
+    background-image: linear-gradient(red, blue);
+}
+
+.matrix-legend .text-grid {
+    display: grid;
+    grid-template-rows: auto auto auto;
+    width: max-content;
+}
+
+.text-grid .text {
+    display: flex;
+    justify-content: right;
+    width: 100%;
+}
+
+.tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    margin-top: 60px;
+}
+
+.data-cell:hover .tooltiptext {
+    visibility: visible;
+}
+
+.btn {
+    margin-top: -6px;
+}

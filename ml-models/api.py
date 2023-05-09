@@ -39,28 +39,27 @@ def get_data_full():
     """
     :return: A list of datetime/temp tuples over the entire dataset
     """
-    dates = np.ndarray.tolist(data.index.to_pydatetime())
-    temps = np.ndarray.tolist(data["temp"].values)
 
-    response = list(zip(temps, dates))
+    result = {
+        'temps': data['temps'].values.tolist(),
+        'dates': [date.isoformat() for date in data.index]
+    }
 
-    return make_response(response)
+    return make_response(result)
 
 
 @app.route('/actuals/subset')
-def get_data_subset():
+def get_dataset_subset():
     """
-    :return: A subset list of the datetime/temp tuples over a date range
+    :return: A list of dates and temperatures for the given period
     """
-    start_date, end_date = verify_date_params(request.args)
-
-    data_subset = data[start_date:end_date]
-    dates = np.ndarray.tolist(data_subset.index.to_pydatetime())
-    temps = np.ndarray.tolist(data_subset["temp"].values)
-
-    response = list(zip(temps, dates))
-
-    return make_response(response)
+    start_date = request.args.get('start_date', type=to_datetime)
+    end_date = request.args.get('end_date', type=to_datetime)
+    result = {
+        'temps': data['temp'][start_date:end_date].values.tolist(),
+        'dates': [date.isoformat() for date in data[start_date:end_date].index]
+    }
+    return make_response(result)
 
 
 @app.route('/actuals/dates')
@@ -99,8 +98,8 @@ def verify_date_params(args):
     :param args: A dict of arguments given in the url
     :return: An array of the verified arguments, where [0] is the input/output horizon and [1] and [2] are the start and end dates respectively.
     """
-    start_date = args.get('start_date', type=datetime.fromisoformat)
-    end_date = args.get('end_date', type=datetime.fromisoformat)
+    start_date = args.get('start_date', type=to_datetime)
+    end_date = args.get('end_date', type=to_datetime)
 
     if not (isinstance(start_date, datetime)):
         raise werkzeug.exceptions.BadRequest('Wrong format: start_date\n'
@@ -130,6 +129,10 @@ def verify_horizon_param(args):
     return horizon
 
 
+def to_datetime(dt: str) -> datetime:
+    return datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S%z").replace(tzinfo=None)
+
+
 @app.errorhandler(werkzeug.exceptions.BadRequest)
 def handle_bad_request(e):
     return e, 400
@@ -147,16 +150,34 @@ def get_model_object(model, horizon):
         model_json = json.load(open(f'{settings.models_path}\\MTGNN\\horizon_{horizon}\\log.json'))
         model_params = model_json['model_parameters']
 
-        num_features = model_params['model_parameters']['num_features']
-        seq_length = model_params['model_parameters']['seq_length']
-        num_layers = model_params['model_parameters']['num_layers']
-        subgraph_size = model_params['model_parameters']['subgraph_size']
-        subgraph_node_dim = model_params['model_parameters']['subgraph_node_dim']
-        use_output_convolution = model_params['model_parameters']['use_output_convolution']
-        dropout = model_params['model_parameters']['dropout']
+        seq_length = model_params['seq_length']
+        num_features = model_params['num_features']
+        num_layers = model_params['num_layers']
+        dropout = model_params['dropout']
+        use_output_convolution = model_params['use_output_convolution']
+        build_adj_matrix = model_params['build_adj_matrix']
+        conv_channels = model_params['conv_channels']
+        residual_channels = model_params['residual_channels']
+        skip_channels = model_params['skip_channels']
+        end_channels = model_params['end_channels']
+        tan_alpha = model_params['tan_alpha']
+        prop_alpha = model_params['prop_alpha']
 
-        model_obj = MTGNN(num_features, seq_length, num_layers, subgraph_size, subgraph_node_dim,
-                          use_output_convolution, dropout)
+        model_obj = MTGNN(num_features=num_features,
+                          seq_length=seq_length,
+                          num_layers=num_layers,
+                          conv_channels=conv_channels,
+                          residual_channels=residual_channels,
+                          skip_channels=skip_channels,
+                          end_channels=end_channels,
+                          build_adj_matrix=build_adj_matrix,
+                          tan_alpha=tan_alpha,
+                          prop_alpha=prop_alpha,
+                          dropout=dropout,
+                          use_output_convolution=use_output_convolution,
+                          subgraph_size=8,
+                          subgraph_node_dim=16)
+
     else:
         model_json = json.load(open(f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}\\log.json'))
         model_params = model_json['model_parameters']
@@ -167,15 +188,22 @@ def get_model_object(model, horizon):
             kernel_size = model_params['kernel_size']
             dropout_prob = model_params['dropout']
 
-            model_obj = CNN(input_channels, hidden_size, kernel_size, dropout_prob)
+            model_obj = CNN(input_channels=input_channels,
+                            hidden_size=hidden_size,
+                            kernel_size=kernel_size,
+                            dropout_prob=dropout_prob)
         elif model == 'mlp':
             input_size = model_params['input_size']
             hidden_size = model_params['hidden_size']
             output_size = model_params['output_size']
             num_layers = model_params['num_layers']
-            seq_length = model_params['seq_length']
+            seq_length = model_json['hyperparameters']['seq_len']
 
-            model_obj = MLP(input_size, hidden_size, output_size, num_layers, seq_length)
+            model_obj = MLP(input_size=input_size,
+                            hidden_size=hidden_size,
+                            output_size=output_size,
+                            num_layers=num_layers,
+                            seq_length=seq_length)
         elif model == 'gru':
             input_size = model_params['input_size']
             hidden_size = model_params['hidden_size']
@@ -183,7 +211,11 @@ def get_model_object(model, horizon):
             dropout_prob = model_params['dropout']
             num_layers = model_params['num_layers']
 
-            model_obj = GRU(input_size, hidden_size, output_size, dropout_prob, num_layers)
+            model_obj = GRU(input_size=input_size,
+                            hidden_size=hidden_size,
+                            output_size=output_size,
+                            dropout_prob=dropout_prob,
+                            num_layers=num_layers)
         elif model == 'rnn':
             input_size = model_params['input_size']
             hidden_size = model_params['hidden_size']
@@ -191,7 +223,11 @@ def get_model_object(model, horizon):
             dropout_prob = model_params['dropout']
             num_layers = model_params['num_layers']
 
-            model_obj = RNN(input_size, hidden_size, output_size, dropout_prob, num_layers)
+            model_obj = RNN(input_size=input_size,
+                            hidden_size=hidden_size,
+                            output_size=output_size,
+                            dropout_prob=dropout_prob,
+                            num_layers=num_layers)
         elif model == 'lstm':
             input_size = model_params['input_size']
             hidden_size = model_params['hidden_size']
@@ -199,13 +235,19 @@ def get_model_object(model, horizon):
             dropout_prob = model_params['dropout']
             num_layers = model_params['num_layers']
 
-            model_obj = LSTM(input_size, hidden_size, output_size, dropout_prob, num_layers)
+            model_obj = LSTM(input_size=input_size,
+                             hidden_size=hidden_size,
+                             output_size=output_size,
+                             dropout_prob=dropout_prob,
+                             num_layers=num_layers)
         elif model == 'tcn':
             input_size = model_params['input_size']
             output_size = model_params['output_size']
             hidden_size = model_params['hidden_size']
 
-            model_obj = TCN(input_size, output_size, hidden_size)
+            model_obj = TCN(input_size=input_size,
+                            output_size=output_size,
+                            hidden_size=hidden_size)
         elif model == 'transformer':
             input_size = model_params['input_size']
             d_model = model_params['d_model']
@@ -214,9 +256,15 @@ def get_model_object(model, horizon):
             output_size = model_params['output_size']
             dropout = model_params['dropout']
 
-            model_obj = Transformer(input_size, d_model, nhead, num_layers, output_size, dropout)
+            model_obj = Transformer(input_size=input_size,
+                                    d_model=d_model,
+                                    nhead=nhead,
+                                    num_layers=num_layers,
+                                    output_size=output_size,
+                                    dropout=dropout)
 
-    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'), map_location=settings.device)
+    state_dict = torch.load(os.path.join(f'saved-models/{model.upper()}/horizon_{horizon}/model.pt'),
+                            map_location=settings.device)
     model_obj.load_state_dict(state_dict)
     model_obj.eval()
 
@@ -250,7 +298,10 @@ def get_inference_data(model, horizon, start_date, end_date):
         result = infer_range(model, horizon, start_date, end_date)
 
     result = crop_result(start_date, end_date, result)
-
+    result = {
+        'temps': [result[i][0] for i in range(len(result))],
+        'dates': [result[i][1].isoformat() for i in range(len(result))]
+    }
     return result
 
 
@@ -303,7 +354,6 @@ def infer_range(model, horizon, start_date, end_date, result=None):
 
         if end_index <= data.index.max():  # No, forecasting
             input_data = data[current_index:end_index]
-
             inference_set = infer(model, horizon, input_data, X_scaler, y_scaler)
         else:  # Forecasting
             input_data = data[data.index.max() - timedelta(hours=horizon):data.index.max()]

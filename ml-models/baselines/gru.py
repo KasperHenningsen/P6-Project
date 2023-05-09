@@ -26,7 +26,7 @@ class GRU(nn.Module):
         h0 = self.init_internal_states()
         out, hn = self.gru(x, h0.detach())
         out = self.linear(out)
-        return torch.squeeze(out)
+        return out.reshape(-1, x.shape[1])
 
     def init_internal_states(self):
         h0 = torch.zeros(1 * self.num_layers, self.batch_size, self.hidden_size, dtype=torch.float64).to(settings.device)

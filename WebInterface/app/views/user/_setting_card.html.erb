@@ -1,0 +1,48 @@
+<%= render 'user/delete_setting_modal', setting: setting %>
+
+<div class="mb-2 me-2 card">
+
+  <div class="p-2 card-body">
+    <div class="row">
+      <div class="col">
+        <h5>Models</h5>
+        <ul>
+          <% setting.models.split(' ').each do |model| %>
+            <li><%= model %></li>
+          <% end %>
+        </ul>
+      </div>
+
+      <div class="col">
+        <h5>Date span</h5>
+        <p>
+          Start date:<br>
+          <%= setting.start_date.strftime("%d-%m-%Y %H:%M") %>
+          <br><br>
+          End date:<br>
+          <%= setting.end_date.strftime("%d-%m-%Y %H:%M") %>
+        </p>
+      </div>
+
+      <div class="col">
+        <h5>Horizon</h5>
+        <p class="card-text">
+          Horizon: <%= setting.horizon %>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer d-flex justify-content-end">
+    <div class="mt-1">
+      <% if setting.has_dataset %>
+        <%= link_to 'Use', graph_path(params: { id: setting.id, dataset_id: setting.datasets_id }), class: 'btn btn-success' %>
+      <% else %>
+        <button class="me-1 btn btn-secondary" type="button" disabled>
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Loading dataset
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>

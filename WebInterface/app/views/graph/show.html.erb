@@ -1,0 +1,53 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="m-4">
+
+  <div class="row">
+    <div class="col-md-2">
+      <ul style="list-style-type: none;">
+        <li>
+          <div>
+            <h5>Date range</h5>
+            <p>
+              Start date:<br>
+              <%= @setting.start_date.strftime("%d-%m-%Y %H:%M") %>
+              <br><br>
+              End date:<br>
+              <%= @setting.end_date.strftime("%d-%m-%Y %H:%M") %>
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <div>
+            <h5>Horizon</h5>
+            <p class="card-text">
+              Horizon: <%= @setting.horizon %>
+            </p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+
+    <div class="col">
+      <canvas id="chart"
+              data-controller="graph"
+              data-graph-dates='<%= @dates.to_json.html_safe %>'
+              data-graph-datasets='<%= @datasets.map { |d| { label: d[:identifier], data: d[:temps] } }.to_json.html_safe %>'
+      ></canvas>
+    </div>
+  </div>
+</div>
+
+
+<div class="col-md-2">
+  <div class="row">
+    <div>
+
+    </div>
+
+    <div class="row">
+
+    </div>
+  </div>
+</div>

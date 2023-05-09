@@ -28,7 +28,7 @@ class LSTM(nn.Module):
         out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
         out = self.relu(out)
         out = self.linear(out)
-        return out.reshape(-1, 12)
+        return out.reshape(-1, x.shape[1])
 
     def init_internal_states(self):
         h0 = torch.zeros(1 * self.num_layers, self.batch_size, self.hidden_size, dtype=torch.float64).to(settings.device)
