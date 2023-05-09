@@ -11,7 +11,7 @@ class ActualValueJob
 
     unless response.to_s.nil? || response.code != 200
       data = JSON.parse(response.to_s)
-      puts "ASSSS: #{data}"
+
       dates = data['dates'].map { |d| DateTime.parse(d) if d }
       temps = data['temps'].map { |t| t.to_f.round(2) if t }
 

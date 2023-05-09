@@ -1,40 +1,39 @@
 <% settings = Setting.where(user_id: current_user.id) %>
 
-<div class="mt-4 container">
-  <h2>Profile</h2>
-  <div class="ms-2">
-    <div>
-      <label class="form-label">Username: <%= current_user.username.titlecase %></label>
+<div class="container">
+  <div class="row">
+
+    <div class="col-md-3">
+      <%= render 'user/profile' %>
     </div>
 
-    <div>
-      <label class="form-label">Email: <%= current_user.email %></label>
-    </div>
+    <div class="col-md-8">
+      <div class="mt-4">
 
-    <% if current_user.admin? %>
-      <div>
-        <label>Admin: <%= current_user.admin? %></label>
-      </div>
-    <% end %>
-  </div>
+        <div class="my-2 row">
+          <div class="col">
+            <h4>Configurations: <%= settings.size %> of 10</h4>
+          </div>
 
-  <div class="mt-4">
-    <h2>Settings: <%= settings.size %> of 10</h2>
+          <div class="col d-flex justify-content-end">
+            <% if settings.size < 10 %>
+              <%= link_to 'Create new configuration', new_setting_path, class: 'btn btn-primary' %>
+            <% else %>
+              <button class="btn btn-primary" disabled>Create new configuration</button>
+            <% end %>
+          </div>
+        </div>
 
-    <div class="ms-2">
-      <div style="max-height: 60vh; overflow-y: auto">
-        <% if settings.any? %>
-          <% settings.each do |setting| %>
+        <div class="ms-2" style="max-height: 82vh; overflow-y: auto">
+          <% if settings.any? %>
+            <% settings.each do |setting| %>
 
-            <%= render 'user/setting_card', setting: setting %>
+              <%= render 'user/setting_card', setting: setting %>
 
+            <% end %>
           <% end %>
-        <% end %>
+        </div>
       </div>
-
-      <% if settings.size < 10 %>
-        <%= link_to 'Create a new setting', new_setting_path(user_id: current_user.id), class: "btn btn-primary mt-2" %>
-      <% end %>
     </div>
   </div>
 </div>

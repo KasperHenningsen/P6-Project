@@ -1,15 +1,40 @@
-<div class="mb-2 card">
+<%= render 'user/delete_setting_modal', setting: setting %>
+
+<div class="mb-2 me-2 card">
+
   <div class="p-2 card-body">
-    <p class="mb-0 pb-0 card-text">
-      Models: <%= setting.models %> <br>
-      Date range: <%= setting.start_date.strftime("%H:%M %d-%m-%Y") %>
-      to <%= setting.end_date.strftime("%H:%M %d-%m-%Y") %><br>
-      Horizon: <%= setting.horizon %>
-    </p>
+    <div class="row">
+      <div class="col">
+        <h5>Models</h5>
+        <ul>
+          <% setting.models.split(' ').each do |model| %>
+            <li><%= model %></li>
+          <% end %>
+        </ul>
+      </div>
+
+      <div class="col">
+        <h5>Date span</h5>
+        <p>
+          Start date:<br>
+          <%= setting.start_date.strftime("%d-%m-%Y %H:%M") %>
+          <br><br>
+          End date:<br>
+          <%= setting.end_date.strftime("%d-%m-%Y %H:%M") %>
+        </p>
+      </div>
+
+      <div class="col">
+        <h5>Horizon</h5>
+        <p class="card-text">
+          Horizon: <%= setting.horizon %>
+        </p>
+      </div>
+    </div>
   </div>
 
-  <div class="card-body">
-    <div class="d-flex">
+  <div class="card-footer d-flex justify-content-end">
+    <div class="mt-1">
       <% if setting.has_dataset %>
         <%= link_to 'Use', graph_path(params: { id: setting.id, dataset_id: setting.datasets_id }), class: 'btn btn-success' %>
       <% else %>
@@ -18,8 +43,6 @@
           Loading dataset
         </button>
       <% end %>
-
-      <%= button_to 'Delete', setting_path(id: setting.id), method: :delete, class: 'btn btn-danger' %>
     </div>
   </div>
 </div>
