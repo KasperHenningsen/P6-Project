@@ -175,8 +175,8 @@ def get_model_object(model, horizon):
                           prop_alpha=prop_alpha,
                           dropout=dropout,
                           use_output_convolution=use_output_convolution,
-                          subgraph_size=8,
-                          subgraph_node_dim=16)
+                          subgraph_size=5,
+                          subgraph_node_dim=12)
 
     else:
         model_json = json.load(open(f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}\\log.json'))
