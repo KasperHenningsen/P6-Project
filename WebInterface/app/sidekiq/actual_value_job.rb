@@ -15,10 +15,11 @@ class ActualValueJob
       dates = data['dates'].map { |d| DateTime.parse(d) if d }
       temps = data['temps'].map { |t| t.to_f.round(2) if t }
 
-      dates.each_with_index do |date, index|
-        data_point = DataPoint.create!(dataset_id: dataset_id, identifier: "Actual", date: date, temp: temps[index])
-        data_point.save!
+      data_points = dates.each_with_index.map do |date, index|
+        { dataset_id: dataset_id, identifier: "Actual", date: date, temp: temps[index] }
       end
+
+      DataPoint.insert_all!(data_points)
     end
   end
 end

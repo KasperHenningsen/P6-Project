@@ -23,5 +23,9 @@ class Setting < ApplicationRecord
     if self.start_date.present? && self.end_date.present? && DateTime.parse(self.start_date.to_s) >= DateTime.parse(self.end_date.to_s)
       errors.add(:start_date, "should be before end date")
     end
+
+    if (self.end_date - self.start_date) > 10.years
+      errors.add(:start_date, " and end date should not span more than 10 years")
+    end
   end
 end
