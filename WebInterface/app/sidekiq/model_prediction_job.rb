@@ -13,7 +13,8 @@ class ModelPredictionJob
     models.each do |model|
       unless setting_exist(models, start_date, end_date, horizon)
         response = send_request(model.downcase, horizon, start_date, end_date)
-        format_responses(response, model, dataset_id)
+        data_points = format_responses(response, model, dataset_id)
+        save_dataset(data_points)
       end
     end
 
@@ -30,21 +31,28 @@ class ModelPredictionJob
   end
 
   def format_responses(response, model, dataset_id)
+    data_points = []
+
     unless response.to_s.nil? || response.code != 200
       data = JSON.parse(response.to_s)
       data['dates'].each_with_index do |date, i|
         temp = data['temps'][i].round(1) if data['temps'][i]
 
-        data_point = DataPoint.create(
+        data_points << DataPoint.new(
           dataset_id: dataset_id,
           identifier: model,
           date: DateTime.parse(date),
           temp: temp
         )
-
-        data_point.save!
       end
     end
+
+    return data_points
+  end
+
+  def save_dataset(data_points)
+    data_point_attrs = data_points.map { |data_point| data_point.attributes }
+    DataPoint.insert_all(data_point_attrs)
   end
 
   def setting_exist(model, start_date, end_date, horizon)

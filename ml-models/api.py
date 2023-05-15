@@ -1,6 +1,5 @@
 import joblib
 import pandas as pd
-import numpy as np
 import torch
 import werkzeug.exceptions
 from flask import Flask, request, send_file, make_response
@@ -49,16 +48,17 @@ def get_data_full():
 
 
 @app.route('/actuals/subset')
-def get_dataset_subset():
+def get_data_subset():
     """
     :return: A list of dates and temperatures for the given period
     """
-    start_date = request.args.get('start_date', type=to_datetime)
-    end_date = request.args.get('end_date', type=to_datetime)
+    start_date, end_date = verify_date_params(request.args)
+
     result = {
         'temps': data['temp'][start_date:end_date].values.tolist(),
         'dates': [date.isoformat() for date in data[start_date:end_date].index]
     }
+
     return make_response(result)
 
 
@@ -103,11 +103,11 @@ def verify_date_params(args):
 
     if not (isinstance(start_date, datetime)):
         raise werkzeug.exceptions.BadRequest('Wrong format: start_date\n'
-                                             'A valid format is e.g. 2000-01-01 00:00:00\n'
+                                             'A valid format is e.g. 2000-01-01T00:00:00%2B0000\n'
                                              'Might be missing leading zeros for the date')
     elif not (isinstance(end_date, datetime)):
         raise werkzeug.exceptions.BadRequest('Wrong format: end_date\n'
-                                             'A valid format is e.g. 2000-01-01 00:00:00\n'
+                                             'A valid format is e.g. 2000-01-01T00:00:00%2B0000\n'
                                              'Might be missing leading zeros for the date')
 
     return start_date, end_date
@@ -175,8 +175,8 @@ def get_model_object(model, horizon):
                           prop_alpha=prop_alpha,
                           dropout=dropout,
                           use_output_convolution=use_output_convolution,
-                          subgraph_size=8,
-                          subgraph_node_dim=16)
+                          subgraph_size=5,
+                          subgraph_node_dim=12)
 
     else:
         model_json = json.load(open(f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}\\log.json'))

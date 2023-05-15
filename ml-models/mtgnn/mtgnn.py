@@ -133,7 +133,7 @@ class MTGNN(nn.Module):
         out = self.end_conv_2(out)
 
         # at this point the output shape is (batch_size, 1, time_steps, features)
-        out = torch.squeeze(out)  # reshape to (batch_size, time_steps, features)
+        out = out.reshape(-1, self.seq_length, self.num_features)  # reshape to (batch_size, time_steps, features)
 
         if self.use_output_convolution:
             # transpose to (batch_size, features, time_steps) to do 1x1 convolution along feature dimension
@@ -144,7 +144,7 @@ class MTGNN(nn.Module):
             # for each time-step we take only the first feature (the target feature)
             out = out[:, :, :1]
 
-        return out.reshape(-1, x.shape[1])  # squeeze to (batch_size, time_steps)
+        return out.reshape(-1, self.seq_length)  # squeeze to (batch_size, time_steps)
 
     def load_saved_model(self):
         state_dict = torch.load(os.path.join(self.path, 'model.pt'))
