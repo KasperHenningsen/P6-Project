@@ -16,9 +16,8 @@ from baselines.transformer import Transformer
 from mtgnn.mtgnn import MTGNN
 from training import train, test
 from utils.plotting import plot
-from utils.data_utils import get_processed_data, prepare_X_and_y
-from utils.file_utils import set_next_save_path, generate_train_test_log, set_load_path, make_scaler_paths
-from utils.data_utils import get_processed_data, prepare_X_and_y, get_processed_data_energy
+from utils.file_utils import make_scaler_paths
+from utils.data_utils import prepare_X_and_y, get_processed_data_energy
 from utils.file_utils import set_next_save_path, generate_train_test_log, set_load_path
 
 if __name__ == '__main__':
@@ -32,14 +31,14 @@ if __name__ == '__main__':
     val_size = 0.2
     grad_clipping = None
     num_features = 36  # 32 for weather or 36 for energy
-    cnn = CNN(input_channels=num_features, hidden_size=12, kernel_size=12, dropout_prob=0)
+    cnn = CNN(input_channels=num_features, hidden_size=seq_length, kernel_size=seq_length, dropout_prob=0.2)
     mlp = MLP(input_size=num_features, hidden_size=256, output_size=1, num_layers=1, seq_length=seq_length)
-    gru = GRU(input_size=num_features, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
-    rnn = RNN(input_size=num_features, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3)
-    lstm = LSTM(input_size=num_features, hidden_size=32, output_size=1, dropout_prob=0, num_layers=1)
-    tcn = TCN(input_size=num_features, output_size=1, hidden_size=3, depth=2, kernel_size=6, dropout=0.2)
-    mtgnn = MTGNN(num_features=num_features, seq_length=seq_length, num_layers=4, subgraph_size=10, subgraph_node_dim=20, use_output_convolution=True, dropout=0.35, tan_alpha=2)
-    transformer = Transformer(input_size=num_features, d_model=128, nhead=4, num_layers=6, output_size=12, dropout=0.1)
+    gru = GRU(input_size=num_features, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3)
+    rnn = RNN(input_size=num_features, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='tanh')
+    lstm = LSTM(input_size=num_features, hidden_size=128, output_size=1, dropout_prob=0.2, num_layers=3)
+    tcn = TCN(input_size=num_features, output_size=1, hidden_size=seq_length, depth=4, kernel_size=seq_length, dropout=0.2)
+    mtgnn = MTGNN(num_features=num_features, seq_length=seq_length, num_layers=3, subgraph_size=5, subgraph_node_dim=10, use_output_convolution=False, dropout=0.3)
+    transformer = Transformer(input_size=num_features, d_model=128, nhead=4, num_layers=6, output_size=seq_length, dropout=0.5)
 
     train_model = mtgnn
     print(f'Model: {train_model.get_name()}')
