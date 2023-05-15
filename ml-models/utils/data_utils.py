@@ -43,6 +43,28 @@ def get_processed_data(path):
     return df
 
 
+def get_processed_data_energy(path):
+    df = pd.read_csv(path).fillna(0)
+    df.index = pd.to_datetime(df['dt_iso'], format='%Y-%m-%d %H:%M:%S')
+    df = df.drop(columns=['dt_iso'])
+    day_in_year = np.array([i.dayofyear for i in df.index])
+    rbf_months = RepeatingBasisFunction(n_periods=12, input_range=(1, 365))
+    day_in_year_df = pd.DataFrame(data=day_in_year)
+    rbf_months_df = pd.DataFrame(data=rbf_months.fit_transform(day_in_year_df),
+                                 index=df.index,
+                                 columns=['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov',
+                                          'dec'])
+    hour_in_day = np.array([i.hour for i in df.index])
+    rbf_hours = RepeatingBasisFunction(n_periods=12, input_range=(0, 23))
+    hour_in_day_df = pd.DataFrame(data=hour_in_day)
+    rbf_hours_df = pd.DataFrame(data=rbf_hours.fit_transform(hour_in_day_df),
+                                index=df.index,
+                                columns=[f'hour_{i:02d}' for i in range(0, 24, 2)])
+    df = pd.concat([df, rbf_hours_df, rbf_months_df], axis=1)
+
+    return df
+
+
 def prepare_X_and_y(input, n_steps_in=12, n_steps_out=12, target_column='temp', step_size=1):
     input_np = input.to_numpy()
     target_idx = input.columns.get_loc(target_column)

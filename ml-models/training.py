@@ -15,9 +15,9 @@ from utils.plotting import plot_loss_history
 
 def train(model, X_train, y_train, X_val, y_val, batch_size, learning_rate, epochs, y_scaler, save_path=None, grad_clipping=None):
     train_dataset = RegressionDataset(X_train, y_train)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=torch.Generator(device=settings.device))
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True, generator=torch.Generator(device=settings.device))
     val_dataset = RegressionDataset(X_val, y_val)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, generator=torch.Generator(device=settings.device))
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, drop_last=True, generator=torch.Generator(device=settings.device))
 
     # Define training parameters
     mae_loss = nn.L1Loss().to(settings.device)
