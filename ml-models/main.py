@@ -27,7 +27,7 @@ if __name__ == '__main__':
     batch_size = 16
     epochs = 20
     learning_rate = 1e-4
-    train_size = 0.8
+    train_size = 0.7
     val_size = 0.1
     grad_clipping = None
     num_features = 36  # 32 for weather or 36 for energy
