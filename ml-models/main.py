@@ -17,13 +17,13 @@ from mtgnn.mtgnn import MTGNN
 from training import train, test
 from utils.plotting import plot
 from utils.data_utils import get_processed_data, prepare_X_and_y
-from utils.file_utils import set_next_save_path, generate_train_test_log, set_load_path
+from utils.file_utils import set_next_save_path, generate_train_test_log, set_load_path, make_scaler_paths
 
 if __name__ == '__main__':
     seq_length = 12         # Number of time-steps to use for each prediction
     target_length = 12      # Number of time-steps to predict
     target_col = 'temp'     # The column to predict
-    batch_size = 8
+    batch_size = 32
     epochs = 15
     learning_rate = 1e-4
     train_size = 0.6
@@ -46,6 +46,8 @@ if __name__ == '__main__':
 
     os.makedirs(settings.models_path, exist_ok=True)
     os.makedirs(settings.plots_path, exist_ok=True)
+    make_scaler_paths([3, 6, 12, 24, 48])
+
 
     # Prepare data
     df = get_processed_data('./data/open-weather-aalborg-2000-2022.csv')
