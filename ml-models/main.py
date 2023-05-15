@@ -24,11 +24,11 @@ if __name__ == '__main__':
     seq_length = 3         # Number of time-steps to use for each prediction
     target_length = 3      # Number of time-steps to predict
     target_col = 'SpotPriceDKK'     # The column to predict ('temp' or 'SpotPriceDKK')
-    batch_size = 32
-    epochs = 15
+    batch_size = 16
+    epochs = 20
     learning_rate = 1e-4
-    train_size = 0.6
-    val_size = 0.2
+    train_size = 0.8
+    val_size = 0.1
     grad_clipping = None
     num_features = 36  # 32 for weather or 36 for energy
     cnn = CNN(input_channels=num_features, hidden_size=seq_length, kernel_size=seq_length, dropout_prob=0.2)
