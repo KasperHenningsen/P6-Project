@@ -1,4 +1,5 @@
 import datetime
+import os
 from os import path
 
 from torch.nn import RNN
@@ -25,7 +26,7 @@ def get_latest_run_no(base_path):
 def set_next_save_path(model):
     base_path = path.join(settings.models_path, model.get_name(), 'runs')
     latest_run_no = get_latest_run_no(base_path)
-    model.path = path.join(base_path, f'run_{latest_run_no+1}')
+    model.path = path.join(base_path, f'run_{latest_run_no + 1}')
 
 
 def set_load_path(model):
@@ -35,7 +36,8 @@ def set_load_path(model):
         model.path = path.join(base_path, f'run_{run_no}')
 
 
-def generate_train_test_log(model, train_losses, test_losses, seq_len, target_len, target_col, batch_size, epochs, learning_rate, train_size, grad_clipping, train_time):
+def generate_train_test_log(model, train_losses, test_losses, seq_len, target_len, target_col, batch_size, epochs,
+                            learning_rate, train_size, grad_clipping, train_time):
     if train_time is not None:
         train_time = int(train_time)
     json_obj = {
@@ -146,3 +148,8 @@ def get_model_params(model) -> object:
         }
     else:
         return None
+
+
+def make_scaler_paths(horizons):
+    for horizon in horizons:
+        os.makedirs(f'{settings.scalers_path}/horizon_{horizon}', exist_ok=True)

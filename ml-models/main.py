@@ -16,6 +16,8 @@ from baselines.transformer import Transformer
 from mtgnn.mtgnn import MTGNN
 from training import train, test
 from utils.plotting import plot
+from utils.data_utils import get_processed_data, prepare_X_and_y
+from utils.file_utils import set_next_save_path, generate_train_test_log, set_load_path, make_scaler_paths
 from utils.data_utils import get_processed_data, prepare_X_and_y, get_processed_data_energy
 from utils.file_utils import set_next_save_path, generate_train_test_log, set_load_path
 
@@ -47,6 +49,8 @@ if __name__ == '__main__':
 
     os.makedirs(settings.models_path, exist_ok=True)
     os.makedirs(settings.plots_path, exist_ok=True)
+    make_scaler_paths([3, 6, 12, 24, 48])
+
 
     # Prepare data
     df = get_processed_data_energy('./data/energidata.csv')
