@@ -9,14 +9,16 @@ class ModelPredictionJob
     horizon = setting.horizon
     start_date = setting.start_date.iso8601
     end_date = setting.end_date.iso8601
+    data_points = []
 
     models.each do |model|
       unless setting_exist(models, start_date, end_date, horizon)
         response = send_request(model.downcase, horizon, start_date, end_date)
-        data_points = format_responses(response, model, dataset_id)
-        save_dataset(data_points)
+        data_points << format_responses(response, model, dataset_id)
       end
     end
+    
+    save_dataset(data_points)
 
     setting.has_dataset = true
     setting.save!
