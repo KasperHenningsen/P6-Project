@@ -2,52 +2,65 @@
 <div class="m-4">
 
   <div class="row">
-    <div class="col-md-2">
-      <ul style="list-style-type: none;">
-        <li>
-          <div>
-            <h5>Date range</h5>
-            <p>
-              Start date:<br>
-              <%= @setting.start_date.strftime("%d-%m-%Y %H:%M") %>
-              <br><br>
-              End date:<br>
-              <%= @setting.end_date.strftime("%d-%m-%Y %H:%M") %>
-            </p>
-          </div>
-        </li>
+    <div class="col-md-2 accordion" id="accordion">
+      <% @setting.models.split(' ').each do |model| %>
+        <% log = ModelLog.find_by(model: model, horizon: @setting.horizon) %>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordian_<%= model %>" aria-expanded="false">
+              <strong><%= model %></strong>
+            </button>
+          </h2>
+          <div id="accordian_<%= model %>" class="accordion-collapse collapse" data-bs-parent="#accordion">
+            <div class="accordion-body">
+              <h5>Hyperparameters:</h5>
+              <p class="ms-2">
+                Sequence length: <%= log.seq_len || "Unknown" %><br>
+                Target length: <%= log.target_len || "Unknown" %><br>
+                Batch size: <%= log.batch_size || "Unknown" %><br>
+                Epochs: <%= log.epochs || "Unknown" %><br>
+                Learning rate: <%= log.learning_rate || "Unknown" %><br>
+                Training size: <%= log.train_size || "Unknown" %>
+              </p>
 
-        <li>
-          <div>
-            <h5>Horizon</h5>
-            <p class="card-text">
-              Horizon: <%= @setting.horizon %>
-            </p>
+              <h5>Model parameters:</h5>
+              <p class="ms-2">
+                Input channels: <%= log.input_channels || "Unknown" %><br>
+                Hidden size: <%= log.hidden_size || "Unknown" %><br>
+                Kernel size: <%= log.kernel_size || "Unknown" %><br>
+                Number of layers: <%= log.num_layers || "Unknown" %><br>
+                Dropout: <%= log.dropout || "Unknown" %><br>
+              </p>
+
+              <h5>Loss:</h5>
+              <div class="ms-2">
+                <h6>Test:</h6>
+                <p class="ms-2">
+                  MAE: <%= format(log.test_mae.to_s, 5) %><br>
+                  SMAPE: <%= log.test_smape %><br>
+                  RMSE: <%= log.test_rmse %>
+                </p>
+
+                <h6>Validation:</h6>
+                <p class="ms-2">
+                  MAE: <%= log.val_mae %><br>
+                  SMAPE: <%= log.val_smape %><br>
+                  RMSE: <%= log.val_rmse %>
+                </p>
+              </div>
+            </div>
           </div>
-        </li>
-      </ul>
+        </div>
+      <% end %>
     </div>
 
 
-    <div class="col">
+    <div class="col-md-10">
       <canvas id="chart"
               data-controller="graph"
               data-graph-dates='<%= @dates.to_json.html_safe %>'
               data-graph-datasets='<%= @datasets.map { |d| { label: d[:identifier], data: d[:temps] } }.to_json.html_safe %>'
       ></canvas>
-    </div>
-  </div>
-</div>
-
-
-<div class="col-md-2">
-  <div class="row">
-    <div>
-
-    </div>
-
-    <div class="row">
-
     </div>
   </div>
 </div>
