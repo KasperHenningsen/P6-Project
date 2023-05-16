@@ -35,7 +35,7 @@
 
   <div class="card-footer d-flex justify-content-end">
     <div class="mt-1">
-      <% if setting.has_dataset %>
+      <% if setting.has_dataset && setting.has_log %>
         <%= link_to 'Use', graph_path(params: { id: setting.id, dataset_id: setting.datasets_id }), class: 'btn btn-success' %>
       <% else %>
         <button class="me-1 btn btn-secondary" type="button" disabled>

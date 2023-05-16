@@ -30,6 +30,7 @@ class SettingsController < ApplicationController
 
     ActualValueJob.perform_async(dataset.id, start_date, end_date)
     ModelPredictionJob.perform_async(@setting.id, dataset.id)
+    ModelLogJob.perform_async(@setting.id)
   end
 
   def destroy
