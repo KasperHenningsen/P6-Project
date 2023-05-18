@@ -6,7 +6,7 @@ from torch import nn
 
 
 class CNN(nn.Module):
-    def __init__(self, input_channels, hidden_size, kernel_size, dropout_prob=0.2):
+    def __init__(self, input_channels, seq_length, hidden_size, kernel_size, dropout_prob=0.2):
         super(CNN, self).__init__()
         self.path = os.path.join(settings.models_path, self.get_name())
         self.input_channels = input_channels
@@ -18,7 +18,7 @@ class CNN(nn.Module):
                                 kernel_size=kernel_size, stride=1, dtype=torch.float64)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(p=dropout_prob)
-        self.linear = nn.Linear(hidden_size * kernel_size, hidden_size, dtype=torch.float64)
+        self.linear = nn.Linear(hidden_size * kernel_size, seq_length, dtype=torch.float64)
         self.to(settings.device)
 
     def forward(self, x):
