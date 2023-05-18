@@ -38,6 +38,22 @@ if __name__ == '__main__':
     lstm = LSTM(input_size=num_features, hidden_size=128, output_size=1, dropout_prob=0.2, num_layers=3)
     tcn = TCN(input_size=num_features, output_size=1, hidden_size=seq_length, depth=4, kernel_size=seq_length, dropout=0.2)
     mtgnn = MTGNN(num_features=num_features, seq_length=seq_length, num_layers=3, subgraph_size=5, subgraph_node_dim=10, use_output_convolution=False, dropout=0.3)
+    mtgnn = MTGNN(num_features=num_features,
+                  seq_length=seq_length,
+                  num_layers=4,
+                  subgraph_size=5,
+                  subgraph_node_dim=10,
+                  subgraph_depth=2,
+                  use_output_convolution=True,
+                  build_adj_matrix=True,
+                  tan_alpha=2,
+                  prop_alpha=0.05,
+                  skip_channels=128,
+                  conv_channels=16,
+                  residual_channels=64,
+                  end_channels=16,
+                  dilation_exponential=2,
+                  dropout=0.3)
     transformer = Transformer(input_size=num_features, d_model=128, nhead=4, num_layers=6, output_size=seq_length, dropout=0.5)
 
     train_model = mtgnn
