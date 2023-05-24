@@ -37,7 +37,6 @@ if __name__ == '__main__':
     rnn = RNN(input_size=num_features, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='tanh')
     lstm = LSTM(input_size=num_features, hidden_size=128, output_size=1, dropout_prob=0.2, num_layers=3)
     tcn = TCN(input_size=num_features, output_size=1, hidden_size=seq_length, depth=4, kernel_size=seq_length, dropout=0.2)
-    mtgnn = MTGNN(num_features=num_features, seq_length=seq_length, num_layers=3, subgraph_size=5, subgraph_node_dim=10, use_output_convolution=False, dropout=0.3)
     mtgnn = MTGNN(num_features=num_features,
                   seq_length=seq_length,
                   num_layers=4,

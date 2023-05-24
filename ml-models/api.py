@@ -21,7 +21,8 @@ import os
 
 app = Flask(__name__)
 
-featurematrix = os.path.join(settings.scripts_path, 'correlation_coefficient_matrix.csv')
+feature_matrix_weather = os.path.join(settings.scripts_path, 'correlation_coefficient_matrix_weather.csv')
+feature_matrix_energy = os.path.join(settings.scripts_path, 'correlation_coefficient_matrix_energy.csv')
 data = get_processed_data(os.path.join(settings.data_path, 'open-weather-aalborg-2000-2022.csv'))
 
 
@@ -30,7 +31,8 @@ def get_feature_matrix():
     """
     :return: CSV of feature correlations
     """
-    return send_file(featurematrix)
+    dataset = request.args.get('dataset').lower()
+    return send_file(feature_matrix_weather) if dataset == 'weather' else send_file(feature_matrix_energy)
 
 
 @app.route('/actuals/full')
