@@ -165,6 +165,16 @@ def get_model_object(model, horizon):
         tan_alpha = model_params['tan_alpha']
         prop_alpha = model_params['prop_alpha']
 
+        subgraph_size = 8
+        subgraph_node_dim = 16
+        subgraph_depth = 2
+        if seq_length == 12:
+            subgraph_size = 5
+            subgraph_node_dim = 10
+        elif seq_length == 48:
+            subgraph_size = 5
+            subgraph_node_dim = 12
+
         model_obj = MTGNN(num_features=num_features,
                           seq_length=seq_length,
                           num_layers=num_layers,
@@ -177,8 +187,10 @@ def get_model_object(model, horizon):
                           prop_alpha=prop_alpha,
                           dropout=dropout,
                           use_output_convolution=use_output_convolution,
-                          subgraph_size=5,
-                          subgraph_node_dim=12)
+                          subgraph_size=subgraph_size,
+                          subgraph_node_dim=subgraph_node_dim,
+                          subgraph_depth=subgraph_depth,
+                          dilation_exponential=2)
 
     else:
         model_json = json.load(open(f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}\\log.json'))
@@ -248,10 +260,17 @@ def get_model_object(model, horizon):
             input_size = model_params['input_size']
             output_size = model_params['output_size']
             hidden_size = model_params['hidden_size']
+            depth = model_params['depth']
+            kernel_size = model_params['kernel_size']
+            dilation_base = model_params['dilation_base']
 
             model_obj = TCN(input_size=input_size,
                             output_size=output_size,
-                            hidden_size=hidden_size)
+                            hidden_size=hidden_size,
+                            depth=depth,
+                            kernel_size=kernel_size,
+                            dilation_base=dilation_base,
+                            dropout=0.2)
         elif model == 'transformer':
             input_size = model_params['input_size']
             d_model = model_params['d_model']

@@ -1,40 +1,40 @@
 {
   "model": "MTGNN",
-  "trained_at": "2023-04-21T07:20:27.174514",
-  "train_time_seconds": 28252,
+  "trained_at": "2023-05-22T16:47:35.730356",
+  "train_time_seconds": 62090,
   "loss": {
     "validation": {
-      "mae": 1.0520730569000558,
-      "smape": 0.23535126332083772,
-      "rmse": 1.2628087260989171
+      "mae": 1.0662772248001149,
+      "smape": 0.24011616026163102,
+      "rmse": 1.3714995026346584
     },
     "test": {
-      "mae": 1.095030340071484,
-      "smape": 0.21690623835845887,
-      "rmse": 1.418251492695537
+      "mae": 1.0801254778642915,
+      "smape": 0.21582329312250728,
+      "rmse": 1.4585317707077836
     }
   },
   "hyperparameters": {
     "seq_len": 12,
     "target_len": 12,
     "target_col": "temp",
-    "batch_size": 4,
-    "epochs": 20,
+    "batch_size": 32,
+    "epochs": 15,
     "learning_rate": 0.0001,
     "train_size": 0.6,
-    "grad_clipping": 5
+    "grad_clipping": null
   },
   "model_parameters": {
     "seq_length": 12,
     "num_features": 32,
-    "num_layers": 3,
+    "num_layers": 4,
     "dropout": 0.3,
     "use_output_convolution": false,
     "build_adj_matrix": true,
     "conv_channels": 32,
-    "residual_channels": 16,
-    "skip_channels": 64,
-    "end_channels": 128,
+    "residual_channels": 64,
+    "skip_channels": 128,
+    "end_channels": 32,
     "tan_alpha": 3,
     "prop_alpha": 0.05
   }
