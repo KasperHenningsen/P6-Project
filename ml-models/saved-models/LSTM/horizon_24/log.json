@@ -1,17 +1,17 @@
 {
   "model": "LSTM",
-  "trained_at": "2023-04-22T21:02:45.964515",
-  "train_time_seconds": 1928,
+  "trained_at": "2023-05-22T20:02:39.854061",
+  "train_time_seconds": 805,
   "loss": {
     "validation": {
-      "mae": 1.6792100577157816,
-      "smape": 0.35726519553661346,
-      "rmse": 2.0134027085673
+      "mae": 1.3356349129838863,
+      "smape": 0.29317914374363574,
+      "rmse": 1.66552519921029
     },
     "test": {
-      "mae": 1.708485158740202,
-      "smape": 0.3197232341428973,
-      "rmse": 2.1838869422585683
+      "mae": 1.377549869378655,
+      "smape": 0.270620058378521,
+      "rmse": 1.8140116290911532
     }
   },
   "hyperparameters": {
@@ -26,9 +26,9 @@
   },
   "model_parameters": {
     "input_size": 32,
-    "hidden_size": 128,
+    "hidden_size": 96,
     "output_size": 1,
-    "num_layers": 3,
-    "dropout": 0.2
+    "num_layers": 2,
+    "dropout": 0.5
   }
 }

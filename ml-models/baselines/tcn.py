@@ -30,7 +30,7 @@ class TCN(nn.Module):
     def forward(self, x):
         out = self.residual_blocks(x)
         out = self.linear(out)
-        return torch.squeeze(out)
+        return out.reshape(-1, x.shape[1])
 
     def load_saved_model(self):
         state_dict = torch.load(os.path.join(self.path, 'model.pt'))
