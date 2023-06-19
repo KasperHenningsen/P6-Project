@@ -28,4 +28,10 @@ class Setting < ApplicationRecord
       errors.add(:start_date, " and end date should not span more than 10 years")
     end
   end
+
+  def remove_dataset
+    self.has_dataset = false
+    self.save!
+    return true
+  end
 end

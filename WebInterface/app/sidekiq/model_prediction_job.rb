@@ -3,7 +3,7 @@ require "http"
 class ModelPredictionJob
   include Sidekiq::Job
 
-  def perform(setting_id, dataset_id)
+  def perform(setting_id)
     setting = Setting.find(setting_id)
     models = setting.models.split(' ')
     horizon = setting.horizon
@@ -14,7 +14,7 @@ class ModelPredictionJob
     models.each do |model|
       unless setting_exist(models, start_date, end_date, horizon)
         response = send_request(model.downcase, horizon, start_date, end_date)
-        data_points << format_responses(response, model, dataset_id)
+        data_points << format_responses(response, model, setting.id)
       end
     end
 
