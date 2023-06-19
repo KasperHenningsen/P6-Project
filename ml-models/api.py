@@ -189,8 +189,10 @@ def get_model_object(model, horizon):
             hidden_size = model_params['hidden_size']
             kernel_size = model_params['kernel_size']
             dropout_prob = model_params['dropout']
+            seq_len = model_json['hyperparameters']['seq_len']
 
             model_obj = CNN(input_channels=input_channels,
+                            seq_length=seq_len,
                             hidden_size=hidden_size,
                             kernel_size=kernel_size,
                             dropout_prob=dropout_prob)
