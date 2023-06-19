@@ -1,17 +1,17 @@
 {
   "model": "RNN",
-  "trained_at": "2023-04-23T14:05:23.836691",
-  "train_time_seconds": 3535,
+  "trained_at": "2023-05-22T22:48:47.351305",
+  "train_time_seconds": 695,
   "loss": {
     "validation": {
-      "mae": 2.0142505375271775,
-      "smape": 0.4166551190581295,
-      "rmse": 2.386109748478105
+      "mae": 1.6668059747607997,
+      "smape": 0.35232595205366707,
+      "rmse": 2.034388914864604
     },
     "test": {
-      "mae": 2.0504042371903233,
-      "smape": 0.3586758703545288,
-      "rmse": 2.5953656323181833
+      "mae": 1.6877214504482236,
+      "smape": 0.3066141508795597,
+      "rmse": 2.188071993406192
     }
   },
   "hyperparameters": {
@@ -26,10 +26,10 @@
   },
   "model_parameters": {
     "input_size": 32,
-    "hidden_size": 256,
+    "hidden_size": 48,
     "output_size": 1,
-    "num_layers": 3,
-    "dropout": 0.2,
-    "nonlinearity": "tanh"
+    "num_layers": 2,
+    "dropout": 0.4,
+    "nonlinearity": "relu"
   }
 }

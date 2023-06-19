@@ -33,8 +33,8 @@ if __name__ == '__main__':
     num_features = 32  # 32 for weather or 36 for energy
     cnn = CNN(input_channels=num_features, hidden_size=seq_length, seq_length=seq_length, kernel_size=seq_length, dropout_prob=0.2)
     mlp = MLP(input_size=num_features, hidden_size=256, output_size=1, num_layers=1, seq_length=seq_length)
-    gru = GRU(input_size=num_features, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3)
-    rnn = RNN(input_size=num_features, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='tanh')
+    gru = GRU(input_size=num_features, hidden_size=96, output_size=1, dropout_prob=0.4, num_layers=2)
+    rnn = RNN(input_size=num_features, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='tanh', seq_length=seq_length)
     lstm = LSTM(input_size=num_features, hidden_size=128, output_size=1, dropout_prob=0.2, num_layers=3)
     tcn = TCN(input_size=num_features, output_size=1, hidden_size=seq_length, depth=4, kernel_size=seq_length, dropout=0.2)
     mtgnn = MTGNN(num_features=num_features,
@@ -55,7 +55,7 @@ if __name__ == '__main__':
                   dropout=0.3)
     transformer = Transformer(input_size=num_features, d_model=128, nhead=4, num_layers=6, output_size=seq_length, dropout=0.5)
 
-    train_model = mtgnn
+    train_model = gru
     print(f'Model: {train_model.get_name()}')
 
     set_next_save_path(train_model)
