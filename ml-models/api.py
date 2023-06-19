@@ -195,13 +195,13 @@ def get_model_object(model, horizon):
     else:
         model_json = json.load(open(f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}\\log.json'))
         model_params = model_json['model_parameters']
+        seq_len = model_json['hyperparameters']['seq_len']
 
         if model == 'cnn':
             input_channels = model_params['input_channels']
             hidden_size = model_params['hidden_size']
             kernel_size = model_params['kernel_size']
             dropout_prob = model_params['dropout']
-            seq_len = model_json['hyperparameters']['seq_len']
 
             model_obj = CNN(input_channels=input_channels,
                             seq_length=seq_len,
@@ -213,13 +213,12 @@ def get_model_object(model, horizon):
             hidden_size = model_params['hidden_size']
             output_size = model_params['output_size']
             num_layers = model_params['num_layers']
-            seq_length = model_json['hyperparameters']['seq_len']
 
             model_obj = MLP(input_size=input_size,
                             hidden_size=hidden_size,
                             output_size=output_size,
                             num_layers=num_layers,
-                            seq_length=seq_length)
+                            seq_length=seq_len)
         elif model == 'gru':
             input_size = model_params['input_size']
             hidden_size = model_params['hidden_size']
@@ -231,7 +230,8 @@ def get_model_object(model, horizon):
                             hidden_size=hidden_size,
                             output_size=output_size,
                             dropout_prob=dropout_prob,
-                            num_layers=num_layers)
+                            num_layers=num_layers,
+                            seq_length=seq_len)
         elif model == 'rnn':
             input_size = model_params['input_size']
             hidden_size = model_params['hidden_size']
@@ -243,7 +243,8 @@ def get_model_object(model, horizon):
                             hidden_size=hidden_size,
                             output_size=output_size,
                             dropout_prob=dropout_prob,
-                            num_layers=num_layers)
+                            num_layers=num_layers,
+                            seq_length=seq_len)
         elif model == 'lstm':
             input_size = model_params['input_size']
             hidden_size = model_params['hidden_size']
@@ -255,7 +256,8 @@ def get_model_object(model, horizon):
                              hidden_size=hidden_size,
                              output_size=output_size,
                              dropout_prob=dropout_prob,
-                             num_layers=num_layers)
+                             num_layers=num_layers,
+                             seq_length=seq_len)
         elif model == 'tcn':
             input_size = model_params['input_size']
             output_size = model_params['output_size']
