@@ -42,7 +42,7 @@ def get_data_full():
     """
 
     result = {
-        'temps': data['temps'].values.tolist(),
+        'temps': data['temp'].values.tolist(),
         'dates': [date.isoformat() for date in data.index]
     }
 
