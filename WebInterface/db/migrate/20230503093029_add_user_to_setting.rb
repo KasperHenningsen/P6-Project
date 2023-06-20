@@ -1,5 +1,5 @@
 class AddUserToSetting < ActiveRecord::Migration[7.0]
   def change
-    add_reference :users, :settings, null: true, foreign_key: true
+    add_reference :settings, :user, null: true, foreign_key: false
   end
 end

@@ -10,6 +10,7 @@ class SettingsController < ApplicationController
 
   def create
     @setting = Setting.create!(setting_params)
+    @setting.user_id = current_user.id
     dataset = Dataset.create!(setting_id: @setting.id)
     start_date = @setting.start_date.iso8601
     end_date = @setting.end_date.iso8601
@@ -26,9 +27,9 @@ class SettingsController < ApplicationController
       render 'new'
     end
 
-    ActualValueJob.perform_async(dataset_id: @setting.id, start_date: start_date, end_date: end_date)
-    ModelPredictionJob.perform_async(setting_id: @setting.id)
-    ModelLogJob.perform_async(setting_id: @setting.id)
+    ActualValueJob.perform_async(@setting.id, start_date, end_date)
+    ModelPredictionJob.perform_async(@setting.id)
+    ModelLogJob.perform_async(@setting.id)
   end
 
   def destroy
