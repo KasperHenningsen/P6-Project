@@ -42,7 +42,7 @@ def get_data_full():
     """
 
     result = {
-        'temps': data['temps'].values.tolist(),
+        'temps': data['temp'].values.tolist(),
         'dates': [date.isoformat() for date in data.index]
     }
 
@@ -178,6 +178,16 @@ def get_model_object(model, horizon):
         tan_alpha = model_params['tan_alpha']
         prop_alpha = model_params['prop_alpha']
 
+        subgraph_size = 8
+        subgraph_node_dim = 16
+        subgraph_depth = 2
+        if seq_length == 12:
+            subgraph_size = 5
+            subgraph_node_dim = 10
+        elif seq_length == 48:
+            subgraph_size = 5
+            subgraph_node_dim = 12
+
         model_obj = MTGNN(num_features=num_features,
                           seq_length=seq_length,
                           num_layers=num_layers,
@@ -190,12 +200,15 @@ def get_model_object(model, horizon):
                           prop_alpha=prop_alpha,
                           dropout=dropout,
                           use_output_convolution=use_output_convolution,
-                          subgraph_size=5,
-                          subgraph_node_dim=10)
+                          subgraph_size=subgraph_size,
+                          subgraph_node_dim=subgraph_node_dim,
+                          subgraph_depth=subgraph_depth,
+                          dilation_exponential=2)
 
     else:
         model_json = json.load(open(f'{settings.models_path}\\{model.upper()}\\horizon_{horizon}\\log.json'))
         model_params = model_json['model_parameters']
+        seq_len = model_json['hyperparameters']['seq_len']
 
         if model == 'cnn':
             input_channels = model_params['input_channels']
@@ -204,6 +217,7 @@ def get_model_object(model, horizon):
             dropout_prob = model_params['dropout']
 
             model_obj = CNN(input_channels=input_channels,
+                            seq_length=seq_len,
                             hidden_size=hidden_size,
                             kernel_size=kernel_size,
                             dropout_prob=dropout_prob)
@@ -212,13 +226,12 @@ def get_model_object(model, horizon):
             hidden_size = model_params['hidden_size']
             output_size = model_params['output_size']
             num_layers = model_params['num_layers']
-            seq_length = model_json['hyperparameters']['seq_len']
 
             model_obj = MLP(input_size=input_size,
                             hidden_size=hidden_size,
                             output_size=output_size,
                             num_layers=num_layers,
-                            seq_length=seq_length)
+                            seq_length=seq_len)
         elif model == 'gru':
             input_size = model_params['input_size']
             hidden_size = model_params['hidden_size']
@@ -230,7 +243,8 @@ def get_model_object(model, horizon):
                             hidden_size=hidden_size,
                             output_size=output_size,
                             dropout_prob=dropout_prob,
-                            num_layers=num_layers)
+                            num_layers=num_layers,
+                            seq_length=seq_len)
         elif model == 'rnn':
             input_size = model_params['input_size']
             hidden_size = model_params['hidden_size']
@@ -242,7 +256,8 @@ def get_model_object(model, horizon):
                             hidden_size=hidden_size,
                             output_size=output_size,
                             dropout_prob=dropout_prob,
-                            num_layers=num_layers)
+                            num_layers=num_layers,
+                            seq_length=seq_len)
         elif model == 'lstm':
             input_size = model_params['input_size']
             hidden_size = model_params['hidden_size']
@@ -254,15 +269,23 @@ def get_model_object(model, horizon):
                              hidden_size=hidden_size,
                              output_size=output_size,
                              dropout_prob=dropout_prob,
-                             num_layers=num_layers)
+                             num_layers=num_layers,
+                             seq_length=seq_len)
         elif model == 'tcn':
             input_size = model_params['input_size']
             output_size = model_params['output_size']
             hidden_size = model_params['hidden_size']
+            depth = model_params['depth']
+            kernel_size = model_params['kernel_size']
+            dilation_base = model_params['dilation_base']
 
             model_obj = TCN(input_size=input_size,
                             output_size=output_size,
-                            hidden_size=hidden_size)
+                            hidden_size=hidden_size,
+                            depth=depth,
+                            kernel_size=kernel_size,
+                            dilation_base=dilation_base,
+                            dropout=0.2)
         elif model == 'transformer':
             input_size = model_params['input_size']
             d_model = model_params['d_model']

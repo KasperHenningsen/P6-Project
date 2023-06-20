@@ -1,17 +1,17 @@
 {
   "model": "GRU",
-  "trained_at": "2023-04-22T18:25:13.336812",
-  "train_time_seconds": 2378,
+  "trained_at": "2023-05-22T21:05:14.588133",
+  "train_time_seconds": 799,
   "loss": {
     "validation": {
-      "mae": 1.6774503510151084,
-      "smape": 0.35804772447049615,
-      "rmse": 2.010725862745514
+      "mae": 1.328763210267357,
+      "smape": 0.2931533050510862,
+      "rmse": 1.6612389018964586
     },
     "test": {
-      "mae": 1.7077787863421579,
-      "smape": 0.32406730477053386,
-      "rmse": 2.1831788883974648
+      "mae": 1.3715871218313593,
+      "smape": 0.2694705734556576,
+      "rmse": 1.8019093489379552
     }
   },
   "hyperparameters": {
@@ -26,9 +26,9 @@
   },
   "model_parameters": {
     "input_size": 32,
-    "hidden_size": 256,
+    "hidden_size": 96,
     "output_size": 1,
-    "num_layers": 3,
-    "dropout": 0.2
+    "num_layers": 2,
+    "dropout": 0.4
   }
 }

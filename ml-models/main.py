@@ -17,24 +17,24 @@ from mtgnn.mtgnn import MTGNN
 from training import train, test
 from utils.plotting import plot
 from utils.file_utils import make_scaler_paths
-from utils.data_utils import prepare_X_and_y, get_processed_data_energy
+from utils.data_utils import prepare_X_and_y, get_processed_data
 from utils.file_utils import set_next_save_path, generate_train_test_log, set_load_path
 
 if __name__ == '__main__':
-    seq_length = 3         # Number of time-steps to use for each prediction
-    target_length = 3      # Number of time-steps to predict
-    target_col = 'SpotPriceDKK'     # The column to predict ('temp' or 'SpotPriceDKK')
-    batch_size = 16
-    epochs = 20
+    seq_length = 12         # Number of time-steps to use for each prediction
+    target_length = 12      # Number of time-steps to predict
+    target_col = 'temp'     # The column to predict ('temp' or 'SpotPriceDKK')
+    batch_size = 32
+    epochs = 15
     learning_rate = 1e-4
-    train_size = 0.7
-    val_size = 0.1
+    train_size = 0.6
+    val_size = 0.2
     grad_clipping = None
-    num_features = 36  # 32 for weather or 36 for energy
-    cnn = CNN(input_channels=num_features, hidden_size=seq_length, kernel_size=seq_length, dropout_prob=0.2)
+    num_features = 32  # 32 for weather or 36 for energy
+    cnn = CNN(input_channels=num_features, hidden_size=seq_length, seq_length=seq_length, kernel_size=seq_length, dropout_prob=0.2)
     mlp = MLP(input_size=num_features, hidden_size=256, output_size=1, num_layers=1, seq_length=seq_length)
-    gru = GRU(input_size=num_features, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3)
-    rnn = RNN(input_size=num_features, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='tanh')
+    gru = GRU(input_size=num_features, hidden_size=96, output_size=1, dropout_prob=0.4, num_layers=2)
+    rnn = RNN(input_size=num_features, hidden_size=256, output_size=1, dropout_prob=0.2, num_layers=3, nonlinearity='tanh', seq_length=seq_length)
     lstm = LSTM(input_size=num_features, hidden_size=128, output_size=1, dropout_prob=0.2, num_layers=3)
     tcn = TCN(input_size=num_features, output_size=1, hidden_size=seq_length, depth=4, kernel_size=seq_length, dropout=0.2)
     mtgnn = MTGNN(num_features=num_features,
@@ -55,7 +55,7 @@ if __name__ == '__main__':
                   dropout=0.3)
     transformer = Transformer(input_size=num_features, d_model=128, nhead=4, num_layers=6, output_size=seq_length, dropout=0.5)
 
-    train_model = mtgnn
+    train_model = gru
     print(f'Model: {train_model.get_name()}')
 
     set_next_save_path(train_model)
@@ -65,9 +65,8 @@ if __name__ == '__main__':
     os.makedirs(settings.plots_path, exist_ok=True)
     make_scaler_paths([3, 6, 12, 24, 48])
 
-
     # Prepare data
-    df = get_processed_data_energy('./data/energidata.csv')
+    df = get_processed_data('./data/open-weather-aalborg-2000-2022.csv')
 
     # Generate RBF plot
     # plot_rbf_small(df)
@@ -134,4 +133,3 @@ if __name__ == '__main__':
     # Plotting
     print("\n========== Plotting ==========")
     plot(train_model, X_test, y_test, start=0, end=40, y_scaler=y_scaler)
-    #plot((cnn, gru, rnn, lstm, tcn, transformer), X_test, y_test, start=0, end=240, step=seq_length)
