@@ -1,0 +1,33 @@
+{
+  "model": "MLP",
+  "trained_at": "2023-04-22T23:09:06.663602",
+  "train_time_seconds": 501,
+  "loss": {
+    "validation": {
+      "mae": 1.6213030892261178,
+      "smape": 0.3498249346575437,
+      "rmse": 2.0052944814854974
+    },
+    "test": {
+      "mae": 1.675809514017169,
+      "smape": 0.31872270743434244,
+      "rmse": 2.192581725829151
+    }
+  },
+  "hyperparameters": {
+    "seq_len": 48,
+    "target_len": 48,
+    "target_col": "temp",
+    "batch_size": 32,
+    "epochs": 15,
+    "learning_rate": 0.0001,
+    "train_size": 0.6,
+    "grad_clipping": null
+  },
+  "model_parameters": {
+    "input_size": 32,
+    "hidden_size": 256,
+    "num_layers": 1,
+    "output_size": 1
+  }
+}

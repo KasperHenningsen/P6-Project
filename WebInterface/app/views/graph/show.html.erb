@@ -1,0 +1,60 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="m-4">
+
+  <div class="row">
+    <div class="col-md-2 accordion" id="accordion" style="min-width: 350px;">
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordian_settings" aria-expanded="false">
+            <strong>Configuration</strong>
+          </button>
+        </h2>
+        <div id="accordian_settings" class="accordion-collapse collapse" data-bs-parent="#accordion">
+          <div class="accordion-body">
+
+            <span class="ms-2"><%= "Start date: #{@setting.start_date.strftime("%d-%b-%Y %H:%M")}" %></span><br>
+            <span class="ms-2"><%= "End date: #{@setting.end_date.strftime("%d-%b-%Y %H:%M")}" %></span><br>
+
+            <span class="ms-2"><%= "Horizon: #{@setting.horizon}" %></span><br>
+
+          </div>
+        </div>
+      </div>
+      <% @setting.models.split(' ').each do |model| %>
+        <% log = ModelLog.find_by(model: model, horizon: @setting.horizon) %>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordian_<%= model %>" aria-expanded="false">
+              <strong><%= model %></strong>
+            </button>
+          </h2>
+          <div id="accordian_<%= model %>" class="accordion-collapse collapse" data-bs-parent="#accordion">
+            <div class="accordion-body">
+
+              <% excluded_attributes = %w[id model horizon trained_at val_mae val_smape val_rmse] %>
+              <% log.attributes.each do |attr, value| %>
+                <% unless excluded_attributes.include?(attr) %>
+                  <% if value.present? %>
+                    <span class="ms-2"><%= "#{attr[5..].upcase}: #{number_with_precision(value, precision: 2)}" %></span><br>
+                  <% end %>
+                <% end %>
+              <% end %>
+
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+
+    <div class="col-md-8">
+      <canvas id="chart"
+              style="min-height: 400px
+              "
+              data-controller="graph"
+              data-graph-dates='<%= @dates.to_json.html_safe %>'
+              data-graph-datasets='<%= @datasets.map { |d| { label: d[:identifier], data: d[:temps] } }.to_json.html_safe %>'
+      ></canvas>
+    </div>
+  </div>
+</div>

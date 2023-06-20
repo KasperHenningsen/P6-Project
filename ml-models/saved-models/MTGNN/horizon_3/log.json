@@ -1,0 +1,41 @@
+{
+  "model": "MTGNN",
+  "trained_at": "2023-05-08T11:54:27.843117",
+  "train_time_seconds": 12084,
+  "loss": {
+    "validation": {
+      "mae": 0.6660894526425419,
+      "smape": 0.15712815246428735,
+      "rmse": 0.9090636428054315
+    },
+    "test": {
+      "mae": 0.730817301786994,
+      "smape": 0.15438792921388833,
+      "rmse": 1.025729808335084
+    }
+  },
+  "hyperparameters": {
+    "seq_len": 3,
+    "target_len": 3,
+    "target_col": "temp",
+    "batch_size": 32,
+    "epochs": 15,
+    "learning_rate": 0.0001,
+    "train_size": 0.6,
+    "grad_clipping": null
+  },
+  "model_parameters": {
+    "seq_length": 3,
+    "num_features": 32,
+    "num_layers": 3,
+    "dropout": 0.3,
+    "use_output_convolution": false,
+    "build_adj_matrix": true,
+    "conv_channels": 32,
+    "residual_channels": 16,
+    "skip_channels": 64,
+    "end_channels": 128,
+    "tan_alpha": 3,
+    "prop_alpha": 0.05
+  }
+}

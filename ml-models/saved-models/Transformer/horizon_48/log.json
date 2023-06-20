@@ -1,0 +1,36 @@
+{
+  "model": "Transformer",
+  "trained_at": "2023-05-01T20:00:53.880346",
+  "train_time_seconds": 18996,
+  "loss": {
+    "validation": {
+      "mae": 2.308019651007619,
+      "smape": 0.42020589785563095,
+      "rmse": 2.738779820616456
+    },
+    "test": {
+      "mae": 2.48578749423155,
+      "smape": 0.38200486976475945,
+      "rmse": 3.1105601221140735
+    }
+  },
+  "hyperparameters": {
+    "seq_len": 48,
+    "target_len": 48,
+    "target_col": "temp",
+    "batch_size": 8,
+    "epochs": 15,
+    "learning_rate": 0.0001,
+    "train_size": 0.6,
+    "grad_clipping": null
+  },
+  "model_parameters": {
+    "input_size": 32,
+    "output_size": 48,
+    "num_layers": 6,
+    "d_model": 128,
+    "nhead": 4,
+    "dim_feedforward": 2048,
+    "dropout": 0.5
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "model": "LSTM",
+  "trained_at": "2023-05-22T19:42:03.945249",
+  "train_time_seconds": 528,
+  "loss": {
+    "validation": {
+      "mae": 1.084811911199181,
+      "smape": 0.24531214658170938,
+      "rmse": 1.3793718669266186
+    },
+    "test": {
+      "mae": 1.1142722884770593,
+      "smape": 0.22433067758878072,
+      "rmse": 1.4840751443761455
+    }
+  },
+  "hyperparameters": {
+    "seq_len": 12,
+    "target_len": 12,
+    "target_col": "temp",
+    "batch_size": 32,
+    "epochs": 15,
+    "learning_rate": 0.0001,
+    "train_size": 0.6,
+    "grad_clipping": null
+  },
+  "model_parameters": {
+    "input_size": 32,
+    "hidden_size": 96,
+    "output_size": 1,
+    "num_layers": 2,
+    "dropout": 0.5
+  }
+}

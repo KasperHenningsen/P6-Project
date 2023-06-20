@@ -1,0 +1,33 @@
+{
+  "model": "CNN",
+  "trained_at": "2023-04-22T17:06:31.384215",
+  "train_time_seconds": 442,
+  "loss": {
+    "validation": {
+      "mae": 1.3260294871246563,
+      "smape": 0.2928666266530752,
+      "rmse": 1.664449381320498
+    },
+    "test": {
+      "mae": 1.3483231632877952,
+      "smape": 0.26753053083172385,
+      "rmse": 1.7884870325465583
+    }
+  },
+  "hyperparameters": {
+    "seq_len": 24,
+    "target_len": 24,
+    "target_col": "temp",
+    "batch_size": 32,
+    "epochs": 15,
+    "learning_rate": 0.0001,
+    "train_size": 0.6,
+    "grad_clipping": null
+  },
+  "model_parameters": {
+    "input_channels": 32,
+    "hidden_size": 24,
+    "kernel_size": 24,
+    "dropout": 0
+  }
+}
