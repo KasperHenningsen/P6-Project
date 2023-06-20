@@ -1,0 +1,2 @@
+class ModelLog < ApplicationRecord
+end

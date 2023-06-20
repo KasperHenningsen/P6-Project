@@ -35,8 +35,14 @@
 
   <div class="card-footer d-flex justify-content-end">
     <div class="mt-1">
-      <% if setting.has_dataset %>
-        <%= link_to 'Use', graph_path(params: { id: setting.id, dataset_id: setting.datasets_id }), class: 'btn btn-success' %>
+      <% has_logs = setting.models.split(' ').all? { |model| ModelLog.where(model: model, horizon: setting.horizon).exists? } %>
+      <% if setting.has_dataset && has_logs %>
+        <div class="btn-group">
+          <%= button_to 'Delete', setting_path(id: setting.id), method: :delete, class: 'btn btn-danger' %>
+        </div>
+        <div class="btn-group">
+          <%= link_to 'Select', graph_path(params: { id: setting.id }), class: 'btn btn-success' %>
+        </div>
       <% else %>
         <button class="me-1 btn btn-secondary" type="button" disabled>
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

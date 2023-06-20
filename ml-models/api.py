@@ -94,6 +94,19 @@ def get_model():
     return make_response(response)
 
 
+@app.route('/logs')
+def get_log():
+    horizon = verify_horizon_param(request.args)
+    model = request.args.get('model')
+
+    log = get_model_log(model, horizon)
+
+    if log is None:
+        return make_response('Log not found', 404)
+    else:
+        return make_response(json.dumps(log), 200)
+
+
 def verify_date_params(args):
     """
     Verifies that the date arguments given in the url is of the correct format
@@ -438,6 +451,28 @@ def crop_result(start_date, end_date, inference_set):
     result = inference_set[start_index:end_index + 1]
 
     return result
+
+
+def get_model_log(model, horizon):
+    """
+    Gets the content of the logfile specified by model and horizon
+    :param model: The NN model used.
+    :param horizon: The input/output horizon.
+    :return: The logfile as JSON or None if the file doesn't exist
+    """
+    project_root = os.path.abspath(os.path.dirname(__file__))
+    log_file_path = os.path.join(project_root, "saved-models", model, f"horizon_{horizon}", "log.json")
+
+    if os.path.exists(log_file_path):
+        with open(log_file_path, "r") as file:
+            log_content = file.read()
+        try:
+            return json.loads(log_content)
+        except json.JSONDecodeError:
+            print(f"Error: Failed to parse JSON from {log_file_path}")
+            return None
+    else:
+        return None
 
 
 if __name__ == '__main__':

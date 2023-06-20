@@ -18,7 +18,7 @@ Rails.application.routes.draw do
     delete 'setting', to: 'settings#delete'
 
     # Feature Matrix
-    get 'featurematrix', to: 'feature_matrix#index'
+    get 'featurematrix', to: 'feature_matrix#show'
   end
 
   # Only admin can access these sites:

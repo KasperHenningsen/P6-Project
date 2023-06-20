@@ -1,7 +1,7 @@
 class GraphController < ApplicationController
   def show
     @setting = Setting.find(params[:id])
-    dataset = Dataset.find(params[:dataset_id])
+    dataset = Dataset.find_by(setting_id: @setting.id)
 
     @datasets = DataPoint.select("identifier, json_group_array(date) AS dates, json_group_array(temp) AS temps")
                          .where(dataset_id: dataset.id)

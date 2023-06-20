@@ -94,7 +94,3 @@
 .data-cell:hover .tooltiptext {
     visibility: visible;
 }
-
-.btn {
-    margin-top: -6px;
-}
