@@ -15,7 +15,9 @@ class ModelLogJob
       end
     end
 
-    ModelLog.insert_all(model_logs.map(&:attributes))
+    if model_logs.any?
+      ModelLog.insert_all(model_logs.map(&:attributes))
+    end
   end
 
   private
@@ -87,7 +89,7 @@ class ModelLogJob
   end
 
   def setting_exist(model, horizon)
-    return ModelLog.where(model: model, horizon: horizon).exists?
+    return ModelLog.find_by(model: model, horizon: horizon).present?
   end
 end
 

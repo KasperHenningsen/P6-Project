@@ -29,7 +29,7 @@ class ModelPredictionJob
   def send_request(model, horizon, start_date, end_date)
     base_url = ENV["MODEL_API_URL"]
     req_url = URI.parse("#{base_url}/predictions/?model=#{model.downcase}&horizon=#{horizon}&start_date=#{start_date}&end_date=#{end_date}")
-    return HTTP.get(req_url)
+    HTTP.get(req_url)
   end
 
   def format_responses(response, model, dataset_id)
@@ -49,7 +49,7 @@ class ModelPredictionJob
       end
     end
 
-    return data_points
+    data_points
   end
 
   def save_dataset(data_points_arr)

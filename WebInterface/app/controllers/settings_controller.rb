@@ -25,11 +25,12 @@ class SettingsController < ApplicationController
       flash[:error] = "There was an error saving the configuration."
 
       render 'new'
+      return
     end
 
     ActualValueJob.perform_async(@setting.id, start_date, end_date)
-    ModelPredictionJob.perform_async(@setting.id)
     ModelLogJob.perform_async(@setting.id)
+    ModelPredictionJob.perform_async(@setting.id)
   end
 
   def destroy
